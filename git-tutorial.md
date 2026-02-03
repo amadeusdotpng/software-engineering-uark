@@ -7,7 +7,7 @@ $ git clone https://github.com/amadeusdotpng/software-engineering-uark.git
 # use this if you're using SSH keys
 $ git clone git@github.com:amadeusdotpng/software-engineering-uark.git
 
-# cd software-engineering-uark
+$ cd software-engineering-uark
 ```
 
 Don't edit the main branch directly make a feature branch instead!
@@ -193,17 +193,16 @@ the latest main branch in our feature branches. To do this, we can do
 ```shell
 # update the main branch; you can also do this in your feature branch if you're
 # working on multiple devices
-git switch main
-git pull --rebase
+$ git switch main
+$ git pull --rebase
 
 # use changes in the main branch in our feature-branch
-git switch <feature-branch>
-git rebase main
+$ git switch <feature-branch>
+$ git rebase main
 
-# you can also merge if you, for some reason, want to have a commit for updating
-# your branch.
-git swtich <feature-branch>
-git merge main
+# you can also merge if you, for some reason, want to have a commit for updating your branch.
+$ git swtich <feature-branch>
+$ git merge main
 ```
 
 It's import to check if your local repo needs to be up to date every once in a
