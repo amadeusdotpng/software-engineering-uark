@@ -111,6 +111,10 @@ With a running environment, run:
 ```bash
 uv pip install <package-name>
 ```
+Equivalently, you could also run:
+```bash
+uv add <package-name>
+```
 
 To install multiple packages, just use spaces:
 ```bash
