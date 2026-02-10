@@ -1,0 +1,7 @@
+[project]
+name = "software-engineering-uark"
+version = "0.1.0"
+description = "Software Engineering Project for the University of Arkansas"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
