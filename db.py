@@ -4,21 +4,35 @@ import psycopg2
 from psycopg2 import sql
 
 if __name__ == '__main__':
-    # Connect to database
-    try:
-        conn = psycopg2.connect(
-            dbname = "photon",
-            user = "student",
-            password = "student",
-            host = "localhost",
-        )
-        cursor = conn.cursor()
+    # Connection parameters
+    DB_NAME = "photon"
+    DB_USER = "student"
+    DB_PASS = "student"
+    DB_HOST = "localhost"
 
+    try:
+        # Connect to database
+        conn = psycopg2.connect(
+            dbname = DB_NAME,
+            user = DB_USER,
+            password = DB_PASS,
+            host = DB_HOST,
+        )
         print("Successfully connected to database.")
+
+        cursor = conn.cursor() # Create cursor
+
+        # Create table if not already present
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS players (
+                id SERIAL PRIMARY KEY,
+                codename VARCHAR(20)
+            );
+        ''')
         
-        cursor.execute("SELECT version();")
-        version = cursor.fetchone()
-        print(f"Connected to - {version}")
+        # cursor.execute("SELECT version();")
+        # version = cursor.fetchone()
+        # print(f"Connected to - {version}")
 
     except Exception as error:
         print(f"Error connecting to PostgreSQL daatabase: {error}")
@@ -26,4 +40,6 @@ if __name__ == '__main__':
     finally:
         if conn:
             conn.close()
-            print("Connection closed.")
+        if cursor:
+            cursor.close()
+        print("Connection closed.")
