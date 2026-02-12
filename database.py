@@ -46,6 +46,15 @@ class PlayerDatabase:
         ''', (id,))
         return self.cursor.fetchone()
     
+    # Check database to see if a player with a given ID already exists
+    def player_exists(self, id):
+        self.cursor.execute('''
+            SELECT EXISTS (
+                SELECT 1 FROM players WHERE id = %s
+            );
+        ''', (id,))
+        return self.cursor.fetchone()[0]
+    
     # Update an existing player's codename
     def update_player(self, id, new_codename):
         self.cursor.execute('''
@@ -70,16 +79,17 @@ class PlayerDatabase:
         if self.cursor:
             self.cursor.close()
 
-# if __name__ == '__main__':
-#     test_db = PlayerDatabase()
+if __name__ == '__main__':
+    test_db = PlayerDatabase()
 
-#     try:
-#         # Test cases
-#         player = test_db.get_player(1)
-#         print(f"Player {player[0]} is named {player[1]}.")
+    try:
+        # Test cases
+        if test_db.player_exists(1):
+            player = test_db.get_player(1)
+            print(f"Player {player[0]} is named {player[1]}.")
 
-#         test_db.display_players()
+        test_db.display_players()
 
-#         test_db.close()
-#     except Exception as error:
-#         print(f"Error connecting to database: {error}")
+        test_db.close()
+    except Exception as error:
+        print(f"Error connecting to database: {error}")
