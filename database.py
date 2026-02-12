@@ -102,6 +102,7 @@ if __name__ == '__main__':
             codename = test_db.get_codename(player_id)
         else:
             # If it doesn't, prompt user for codename
+            print("Player does not exist.")
             codename = input("Enter a codename: ")
             
             # Add new entry into the database
@@ -111,6 +112,7 @@ if __name__ == '__main__':
         print(f"ID: {player_id}\tCodename: {codename}")
 
         # Display all players
+        print("\nDisplaying all players:")
         test_db.display_players()
     except Exception as error:
         print(f"Error connecting to database: {error}")
