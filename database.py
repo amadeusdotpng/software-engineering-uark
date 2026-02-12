@@ -70,20 +70,16 @@ class PlayerDatabase:
         if self.cursor:
             self.cursor.close()
 
+# if __name__ == '__main__':
+#     test_db = PlayerDatabase()
 
-if __name__ == '__main__':
-    test_db = PlayerDatabase()
+#     try:
+#         # Test cases
+#         player = test_db.get_player(1)
+#         print(f"Player {player[0]} is named {player[1]}.")
 
-    try:
-        # Test cases
-        test_db.delete_player(1)
-        test_db.add_player(1, 'Athena')
-        test_db.update_player(1, 'Minerva')
-        player = test_db.get_player(1)
-        print(f"Player {player[0]} is named {player[1]}.")
+#         test_db.display_players()
 
-        test_db.display_players()
-
-        test_db.close()
-    except Exception as error:
-        print(f"Error connecting to database: {error}")
+#         test_db.close()
+#     except Exception as error:
+#         print(f"Error connecting to database: {error}")
