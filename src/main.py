@@ -18,6 +18,12 @@ class MainWindow(QtWidgets.QWidget):
 
         self.create_table()
 
+        # Text input field
+        self.input_field = QtWidgets.QLineEdit()
+        self.input_field.setPlaceholderText("Enter player ID...")
+        self.input_field.returnPressed.connect(self.on_enter)
+        self.layout.addWidget(self.input_field)
+
         # Start game button
         self.button = QtWidgets.QPushButton("Start Game")
         self.button.clicked.connect(self.start_game)
@@ -45,25 +51,29 @@ class MainWindow(QtWidgets.QWidget):
     #Create table
     def create_table(self):
         self.tableWidget = QTableWidget()
-        # self.tableWidget.setSectionResizeMode()
-        self.tableWidget.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.tableWidget.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers) # Disable editing of table
 
-        #Row count
+        # Set dimensions
         self.tableWidget.setRowCount(15)
-
-        #Column count
         self.tableWidget.setColumnCount(6)
 
-        # self.tableWidget.ReadOnlyDelegate()
+       # Center the team labels
+        red_team = QTableWidgetItem("RED TEAM")
+        red_team.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tableWidget.setItem(0, 0, red_team)
+        self.tableWidget.setSpan(0, 0, 1, 3)
 
-        self.tableWidget.setItem(0,0, QTableWidgetItem("RED TEAM")) # TODO: lock cells
-        self.tableWidget.setItem(0,3, QTableWidgetItem("GREEN TEAM"))
-        self.tableWidget.setItem(1,0, QTableWidgetItem("PLAYER ID"))
-        self.tableWidget.setItem(1,1, QTableWidgetItem("CODENAME"))
-        self.tableWidget.setItem(1,2, QTableWidgetItem("EQUIPMENT ID"))
-        self.tableWidget.setItem(1,3, QTableWidgetItem("PLAYER ID"))
-        self.tableWidget.setItem(1,4, QTableWidgetItem("CODENAME"))
-        self.tableWidget.setItem(1,5, QTableWidgetItem("CODENAME"))
+        green_team = QTableWidgetItem("GREEN TEAM")
+        green_team.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.tableWidget.setItem(0, 3, green_team)
+        self.tableWidget.setSpan(0, 3, 1, 3)
+
+        # Add section headings
+        headings = ["PLAYER ID", "CODENAME", "EQUIPMENT ID", "PLAYER ID", "CODENAME", "CODENAME"]
+        for col, heading in enumerate(headings):
+            item = QTableWidgetItem(heading)
+            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            self.tableWidget.setItem(1, col, item)
 
         #Table will fit the screen horizontally
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
@@ -72,9 +82,21 @@ class MainWindow(QtWidgets.QWidget):
 
         self.layout.addWidget(self.tableWidget)
 
+        # Hide row/column headers
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setVisible(False)
+
     def start_game(self):
-        # TODO: actually start the game, currently just ends the program
+        # TODO: actually start the game, currently just ends the program :P
         self.close()
+
+    def on_enter(self):
+        text = self.input_field.text()
+        print(f"Entered: {text}")
+
+        # TODO: query the database here
+
+        self.input_field.clear()  # Clears the field after pressing enter
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
