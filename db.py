@@ -25,14 +25,25 @@ if __name__ == '__main__':
         # Create table if not already present
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS players (
-                id SERIAL PRIMARY KEY,
-                codename VARCHAR(20)
+                id INTEGER PRIMARY KEY,
+                codename VARCHAR(255)
             );
         ''')
         
-        # cursor.execute("SELECT version();")
-        # version = cursor.fetchone()
-        # print(f"Connected to - {version}")
+        # Insert data
+        cursor.execute('''
+            INSERT INTO players (id, codename) VALUES
+            (1, 'Scooby'),
+            (2, 'Doo')
+        ''')
+
+        conn.commit() # Commit changes
+
+        # Fetch and display data from table
+        cursor.execute("SELECT * FROM players;")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
 
     except Exception as error:
         print(f"Error connecting to PostgreSQL daatabase: {error}")
