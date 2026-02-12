@@ -45,12 +45,16 @@ class MainWindow(QtWidgets.QWidget):
     #Create table
     def create_table(self):
         self.tableWidget = QTableWidget()
+        # self.tableWidget.setSectionResizeMode()
+        self.tableWidget.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
         #Row count
         self.tableWidget.setRowCount(15)
 
         #Column count
         self.tableWidget.setColumnCount(6)
+
+        # self.tableWidget.ReadOnlyDelegate()
 
         self.tableWidget.setItem(0,0, QTableWidgetItem("RED TEAM")) # TODO: lock cells
         self.tableWidget.setItem(0,3, QTableWidgetItem("GREEN TEAM"))
