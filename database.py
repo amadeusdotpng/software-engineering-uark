@@ -38,13 +38,13 @@ class PlayerDatabase:
         ''', (id,))
         self.conn.commit()
 
-    # Fetch an entry in table
-    def get_player(self, id):
+    # Returns corresponding codename given an ID
+    def get_codename(self, id):
         self.cursor.execute('''
-            SELECT * FROM players
+            SELECT codename FROM players
             WHERE id = %s;
         ''', (id,))
-        return self.cursor.fetchone()
+        return self.cursor.fetchone()[0]
     
     # Check database to see if a player with a given ID already exists
     def player_exists(self, id):
@@ -54,6 +54,14 @@ class PlayerDatabase:
             );
         ''', (id,))
         return self.cursor.fetchone()[0]
+
+    # Fetch an entry in table
+    def get_player(self, id):
+        self.cursor.execute('''
+            SELECT * FROM players
+            WHERE id = %s;
+        ''', (id,))
+        return self.cursor.fetchone()
     
     # Update an existing player's codename
     def update_player(self, id, new_codename):
@@ -82,14 +90,30 @@ class PlayerDatabase:
 if __name__ == '__main__':
     test_db = PlayerDatabase()
 
+    # Example test case of how the program flow is supposed to go
     try:
-        # Test cases
-        if test_db.player_exists(1):
-            player = test_db.get_player(1)
-            print(f"Player {player[0]} is named {player[1]}.")
+        # Prompt user for player ID
+        player_id = int(input("Enter the player ID: "))
+        codename = None
 
+        # Query database to see if it exists
+        if test_db.player_exists(player_id):
+            # If it does, retrieve the codename
+            codename = test_db.get_codename(player_id)
+        else:
+            # If it doesn't, prompt user for codename
+            codename = input("Enter a codename: ")
+            
+            # Add new entry into the database
+            test_db.add_player(player_id, codename)
+
+        # Print player info
+        print(f"ID: {player_id}\tCodename: {codename}")
+
+        # Display all players
         test_db.display_players()
-
-        test_db.close()
     except Exception as error:
         print(f"Error connecting to database: {error}")
+    
+    # Close database
+    test_db.close()
