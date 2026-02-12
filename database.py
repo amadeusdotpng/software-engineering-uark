@@ -27,20 +27,28 @@ class PlayerDatabase:
         self.conn.commit()
 
     # Delete entry in table
-    def delete_player(self, id, codename):
+    def delete_player(self, id):
         self.cursor.execute('''
             DELETE FROM players
-            WHERE id = %s AND codename = %s;
-        ''', (id, codename))
+            WHERE id = %s;
+        ''', (id,))
         self.conn.commit()
+
+    # Fetch an entry in table
+    def get_player(self, id):
+        self.cursor.execute('''
+            SELECT * FROM players
+            WHERE id = %s;
+        ''', (id,))
+        return self.cursor.fetchone()
 
     # Fetch and display all entries in table
     def display_players(self):
         self.cursor.execute("SELECT * FROM players;")
         rows = self.cursor.fetchall()
 
-        for row in rows:
-            print(row)
+        for data in rows:
+            print(f"ID: {data[0]}\tCodename: {data[1]}")
 
     # Close cursor and connection
     def close(self):
@@ -53,10 +61,15 @@ class PlayerDatabase:
 if __name__ == '__main__':
     test_db = PlayerDatabase()
 
-    # Test cases
     try:
+        # Test cases
         # test_db.add_player(3, 'foo')
-        test_db.delete_player(3, 'foo')
+        test_db.delete_player(2)
+        player = test_db.get_player(1)
+        print(f"Player {player[0]} is named {player[1]}.")
+
         test_db.display_players()
+
+        test_db.close()
     except Exception as error:
         print(f"Error connecting to database: {error}")
