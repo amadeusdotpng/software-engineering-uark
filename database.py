@@ -3,6 +3,10 @@
 import psycopg2
 from psycopg2 import sql
 
+# Database is named photon and contains one table called players
+# The table has two columns: id and codename
+# id is an integer and codename is a string
+
 class PlayerDatabase:
     def __init__(self):
         try:
@@ -41,6 +45,15 @@ class PlayerDatabase:
             WHERE id = %s;
         ''', (id,))
         return self.cursor.fetchone()
+    
+    # Update an existing player's codename
+    def update_player(self, id, new_codename):
+        self.cursor.execute('''
+            UPDATE players
+            SET codename = %s
+            WHERE id = %s;
+        ''', (new_codename, id))
+        self.conn.commit()
 
     # Fetch and display all entries in table
     def display_players(self):
@@ -63,8 +76,9 @@ if __name__ == '__main__':
 
     try:
         # Test cases
-        # test_db.add_player(3, 'foo')
-        test_db.delete_player(2)
+        test_db.delete_player(1)
+        test_db.add_player(1, 'Athena')
+        test_db.update_player(1, 'Minerva')
         player = test_db.get_player(1)
         print(f"Player {player[0]} is named {player[1]}.")
 
