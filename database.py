@@ -46,7 +46,7 @@ class PlayerDatabase:
         ''', (id,))
         return self.cursor.fetchone()[0]
     
-    # Check database to see if a player with a given ID already exists
+    # Returns True if a player with a given ID already exists in the database
     def player_exists(self, id):
         self.cursor.execute('''
             SELECT EXISTS (
@@ -61,7 +61,7 @@ class PlayerDatabase:
             SELECT * FROM players
             WHERE id = %s;
         ''', (id,))
-        return self.cursor.fetchone()
+        return self.cursor.fetchone() # Returns a tuple formatted (id, codename)
     
     # Update an existing player's codename
     def update_player(self, id, new_codename):
@@ -87,35 +87,35 @@ class PlayerDatabase:
         if self.cursor:
             self.cursor.close()
 
-if __name__ == '__main__':
-    test_db = PlayerDatabase()
+# if __name__ == '__main__':
+#     test_db = PlayerDatabase()
 
-    # Example test case of how the program flow is supposed to go
-    try:
-        # Prompt user for player ID
-        player_id = int(input("Enter the player ID: "))
-        codename = None
+#     # Example test case of how the program flow is supposed to go
+#     try:
+#         # Prompt user for player ID
+#         player_id = int(input("Enter the player ID: "))
+#         codename = None
 
-        # Query database to see if it exists
-        if test_db.player_exists(player_id):
-            # If it does, retrieve the codename
-            codename = test_db.get_codename(player_id)
-        else:
-            # If it doesn't, prompt user for codename
-            print("Player does not exist.")
-            codename = input("Enter a codename: ")
+#         # Query database to see if it exists
+#         if test_db.player_exists(player_id):
+#             # If it does, retrieve the codename
+#             codename = test_db.get_codename(player_id)
+#         else:
+#             # If it doesn't, prompt user for codename
+#             print("Player does not exist.")
+#             codename = input("Enter a codename: ")
             
-            # Add new entry into the database
-            test_db.add_player(player_id, codename)
+#             # Add new entry into the database
+#             test_db.add_player(player_id, codename)
 
-        # Print player info
-        print(f"ID: {player_id}\tCodename: {codename}")
+#         # Print player info
+#         print(f"ID: {player_id}\tCodename: {codename}")
 
-        # Display all players
-        print("\nDisplaying all players:")
-        test_db.display_players()
-    except Exception as error:
-        print(f"Error connecting to database: {error}")
+#         # Display all players
+#         print("\nDisplaying all players:")
+#         test_db.display_players()
+#     except Exception as error:
+#         print(f"Error connecting to database: {error}")
     
-    # Close database
-    test_db.close()
+#     # Close database
+#     test_db.close()
