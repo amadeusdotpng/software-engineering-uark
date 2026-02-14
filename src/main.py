@@ -16,51 +16,56 @@ class MainWindow(QtWidgets.QWidget):
         super().__init__()
 
         self.setWindowTitle("PHOTON - Start Screen")
-
         self.resize(720, 643)
 
-        self._layout = QtWidgets.QVBoxLayout(self)
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        self.text = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self._layout.addWidget(self.text)
+        vlayout = QtWidgets.QVBoxLayout(self)
 
+        title = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
+        vlayout.addWidget(title)
+
+        hlayout = QHBoxLayout()
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
+
+        # Player Tables
         self.red_table   = PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR)
         self.green_table = PlayerTable("GREEN TEAM", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR)
-
-        self._hlayout = QHBoxLayout()
-        self._hlayout.addWidget(self.red_table, 0)
-        self._hlayout.addWidget(self.green_table, 0)
-        self._layout.addLayout(self._hlayout)
+        hlayout.addWidget(self.red_table, 0)
+        hlayout.addWidget(self.green_table, 0)
+        vlayout.addLayout(hlayout)
 
         # Text input field
         self.input_field = QtWidgets.QLineEdit()
         self.input_field.setPlaceholderText("ENTER PLAYER ID...")
         self.input_field.returnPressed.connect(self.enter_id)
-        self._layout.addWidget(self.input_field)
+        vlayout.addWidget(self.input_field)
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
         self.button.clicked.connect(self.start_game)
-        self._layout.addWidget(self.button)
+        vlayout.addWidget(self.button)
 
+        # Splash Screen
+        # It's important that this is the last one initialized so that it shows up on top of everything.
+        pixmap = QtGui.QPixmap('res/splash_screen.jpg').scaled(self.width(), self.height())
+        self.splash_screen = QtWidgets.QLabel(self)
+        self.splash_screen.setPixmap(pixmap)
 
-        self.setLayout(self._layout)
-        print(self.layout() is self._layout)
+        self.setLayout(vlayout)
 
     def showEvent(self, event: QtGui.QShowEvent):
         super().showEvent(event)
-
-        # show splash screen when the main window is shown
-        label = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap('res/splash_screen.jpg').scaled(725, 648)
-        label.setPixmap(pixmap)
-        label.resize(720, 643)
-        label.show()
+        self.splash_screen.show()
 
         # close splash screen after 3 seconds
-        QtCore.QTimer.singleShot(3000, label.close)
+        QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
-        pass
+    def resizeEvent(self, event:QtGui.QResizeEvent):
+        super().resizeEvent(event)
+        if self.splash_screen.isVisible():
+            pixmap = self.splash_screen.pixmap().scaled(self.width(), self.height())
+            self.splash_screen.setPixmap(pixmap)
+            self.splash_screen.resize(self.width(), self.height())
 
     def start_game(self):
         # TODO: actually start the game, currently just ends the program :P
@@ -77,8 +82,8 @@ class MainWindow(QtWidgets.QWidget):
 
         # TODO: query the database here
         # TODO: add option to which team a player should be added
-        self.red_table.add_player(text, "2", "3")
-        self.green_table.add_player(text, "2", "3")
+        self.red_table.add_player(player_id, "2", "3")
+        self.green_table.add_player(player_id, "2", "3")
         self.input_field.clear()  # Clears the field after pressing enter
 
 class PlayerTable(QtWidgets.QWidget):
