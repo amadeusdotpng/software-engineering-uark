@@ -9,7 +9,7 @@ RED_SECONDARY_COLOR = QtGui.QColor(210, 70, 70)
 GREEN_MAIN_COLOR = QtGui.QColor(30, 130, 30)
 GREEN_SECONDARY_COLOR = QtGui.QColor(60, 170, 60)
 WHITE = QtGui.QColor(255, 255, 255)
-GRAY = QtGui.QColor(100, 100, 100)
+DAKRGRAY = QtGui.QColor(60, 60, 60)
 
 class MainWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -19,25 +19,33 @@ class MainWindow(QtWidgets.QWidget):
 
         self.resize(720, 643)
 
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self._layout = QtWidgets.QVBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.text = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
-        self.layout.addWidget(self.text)
+        self._layout.addWidget(self.text)
 
-        self.create_table()
+        self.red_table   = PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR)
+        self.green_table = PlayerTable("GREEN TEAM", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR)
+
+        self._hlayout = QHBoxLayout()
+        self._hlayout.addWidget(self.red_table, 0)
+        self._hlayout.addWidget(self.green_table, 0)
+        self._layout.addLayout(self._hlayout)
 
         # Text input field
         self.input_field = QtWidgets.QLineEdit()
         self.input_field.setPlaceholderText("ENTER PLAYER ID...")
         self.input_field.returnPressed.connect(self.enter_id)
-        self.layout.addWidget(self.input_field)
+        self._layout.addWidget(self.input_field)
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
         self.button.clicked.connect(self.start_game)
-        self.layout.addWidget(self.button)
+        self._layout.addWidget(self.button)
 
 
-        self.setLayout(self.layout)
+        self.setLayout(self._layout)
+        print(self.layout() is self._layout)
 
     def showEvent(self, event: QtGui.QShowEvent):
         super().showEvent(event)
@@ -54,63 +62,12 @@ class MainWindow(QtWidgets.QWidget):
 
         pass
 
-    #Create table
-    def create_table(self):
-        self.tableWidget = QTableWidget()
-        self.tableWidget.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers) # Disable editing of table
-
-        # Set dimensions
-        self.tableWidget.setRowCount(25)
-        self.tableWidget.setColumnCount(6)
-
-       # Center the team labels
-        red_team = QTableWidgetItem("RED TEAM")
-        red_team.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        red_team.setBackground(RED_MAIN_COLOR)
-        self.tableWidget.setItem(0, 0, red_team)
-        self.tableWidget.setSpan(0, 0, 1, 3)
-
-        green_team = QTableWidgetItem("GREEN TEAM")
-        green_team.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        green_team.setBackground(GREEN_MAIN_COLOR)
-        self.tableWidget.setItem(0, 3, green_team)
-        self.tableWidget.setSpan(0, 3, 1, 3)
-
-        # Add section headings
-        headings = ["PLAYER ID", "CODENAME", "EQUIPMENT ID", "PLAYER ID", "CODENAME", "CODENAME"]
-        for col, heading in enumerate(headings):
-            item = QTableWidgetItem(heading)
-            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-            if (col < 3):
-                item.setBackground(RED_SECONDARY_COLOR)
-            else:
-                item.setBackground(GREEN_SECONDARY_COLOR)
-            self.tableWidget.setItem(1, col, item)
-
-        # Fill remaining data cells with gray
-        for row in range(2, 25):
-            for col in range(6):
-                item = QTableWidgetItem()
-                item.setBackground(GRAY)
-                self.tableWidget.setItem(row, col, item)
-
-        #Table will fit the screen horizontally
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-        self.layout.addWidget(self.tableWidget)
-
-        # Hide row/column headers
-        self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.horizontalHeader().setVisible(False)
-
     def start_game(self):
         # TODO: actually start the game, currently just ends the program :P
         self.close()
 
     def enter_id(self):
         text = self.input_field.text()
-
         try:
             player_id = int(text)
         except ValueError:
@@ -119,13 +76,79 @@ class MainWindow(QtWidgets.QWidget):
             return
 
         # TODO: query the database here
-        # TODO: insert into the correct row rather than hardcoding row 2
-        item = QTableWidgetItem(str(player_id))
-        item.setBackground(GRAY)
-        self.tableWidget.setItem(2, 0, item)
-        print(f"Entered: {player_id}")
-
+        # TODO: add option to which team a player should be added
+        self.red_table.add_player(text, "2", "3")
+        self.green_table.add_player(text, "2", "3")
         self.input_field.clear()  # Clears the field after pressing enter
+
+class PlayerTable(QtWidgets.QWidget):
+    def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
+        super().__init__()
+        self.team_name = team_name
+        self.team_primary_color = team_primary_color
+        self.team_secondary_color = team_secondary_color
+        self.players_num = 0
+
+        layout = QVBoxLayout()
+
+        self.player_table = QTableWidget()
+        self.player_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers) # Disable editing of table
+
+        # Set dimensions
+        self.player_table.setRowCount(20)
+        self.player_table.setColumnCount(3)
+        
+        # Table will fit the screen horizontally
+        self.player_table.horizontalHeader().setStretchLastSection(True)
+        self.player_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+        # Hide row/column headers
+        self.player_table.verticalHeader().setVisible(False)
+        self.player_table.horizontalHeader().setVisible(False)
+
+        # Center the team labels
+        table_header = QTableWidgetItem(team_name)
+        table_header.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        table_header.setBackground(team_primary_color)
+        self.player_table.setItem(0, 0, table_header)
+        self.player_table.setSpan(0, 0, 1, 3)
+
+        # Add section headings
+        for col, heading in enumerate(['PLAYER ID', 'CODENAME', 'EQUIPMENT ID']):
+            item = QTableWidgetItem(heading)
+            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            item.setBackground(team_secondary_color)
+            self.player_table.setItem(1, col, item)
+
+        layout.addWidget(self.player_table)
+
+        # Fill remaining data cells with gray
+        for row in range(2, self.player_table.rowCount()):
+            for col in range(6):
+                item = QTableWidgetItem()
+                item.setBackground(DAKRGRAY)
+                item.setForeground(WHITE)
+                self.player_table.setItem(row, col, item)
+
+        self.setLayout(layout)
+
+    def add_player(self, player_id, codename, equipment_id):
+        if self.player_table.rowCount() - 2 <= self.players_num:
+            self.player_table.insertRow(self.player_table.rowCount())
+
+            for col in range(self.player_table.columnCount()):
+                item = QTableWidgetItem()
+                item.setBackground(DAKRGRAY)
+                item.setForeground(WHITE)
+                self.player_table.setItem(2 + self.players_num, col, item)
+
+        for col, text in enumerate([player_id, codename, equipment_id]):
+            item = self.player_table.item(2 + self.players_num, col)
+
+            assert item is not None
+            item.setText(str(text))
+
+        self.players_num += 1
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
