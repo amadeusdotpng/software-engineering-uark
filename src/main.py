@@ -109,8 +109,6 @@ class MainWindow(QtWidgets.QWidget):
             dlg.exec()
             return
 
-        self.player_equipment_id_map[player_id] = equipment_id
-
         if self.db.player_exists(player_id):
             codename = self.db.get_codename(player_id)
         else:
@@ -120,6 +118,7 @@ class MainWindow(QtWidgets.QWidget):
             self.db.add_player(player_id, codename)
 
         assert team_name is not None
+        self.player_equipment_id_map[player_id] = equipment_id
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
         self.client.send_equipment_id(equipment_id)
 
@@ -309,6 +308,13 @@ class AddCodenameDialog(QtWidgets.QDialog):
         self.setLayout(vlayout)
 
     def accept(self):
+        if not self.codename_field.text():
+            self.label.setText("Please enter a valid codename!")
+            self.label.setAutoFillBackground(True)
+            p = self.label.palette()
+            p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
+            self.label.setPalette(p)
+            return
         self.codename = self.codename_field.text()
         super().accept()
 
@@ -361,7 +367,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
             assert all(0 <= v <= 255 for v in addrs)
             self.addr = ".".join(str(v) for v in addrs)
         except Exception:
-            self.label.setText("Please use a valid IPv4 address")
+            self.label.setText("Please use a valid IPv4 address!")
             self.label.setAutoFillBackground(True)
             p = self.label.palette()
             p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
