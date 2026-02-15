@@ -20,6 +20,7 @@ class MainWindow(QtWidgets.QWidget):
         super().__init__()
 
         self.db = db
+        self.player_equipment_id_map = {}
 
         self.setWindowTitle("PHOTON - Start Screen")
         self.resize(720, 643)
@@ -88,6 +89,12 @@ class MainWindow(QtWidgets.QWidget):
             return
 
         player_id, equipment_id, team_name = dlg.get_data()
+        if player_id in self.player_equipment_id_map:
+            dlg = QtWidgets.QMessageBox(text=f"Player ID '{player_id}' has already been added!")
+            dlg.exec()
+            return
+
+        self.player_equipment_id_map[player_id] = equipment_id
 
         if self.db.player_exists(player_id):
             codename = self.db.get_codename(player_id)
@@ -99,6 +106,8 @@ class MainWindow(QtWidgets.QWidget):
 
         assert team_name is not None
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
+
+
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
@@ -168,6 +177,8 @@ class PlayerTable(QtWidgets.QWidget):
             item.setText(str(text))
 
         self.players_num += 1
+
+
 
 class AddPlayerDialog(QtWidgets.QDialog):
     def __init__(self, team_choices: list[str]):
@@ -239,6 +250,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
     def get_data(self) -> tuple[int | None, int | None, str | None]:
         return (self.player_id, self.equipment_id, self.team_name)
+
 
 
 class AddCodenameDialog(QtWidgets.QDialog):
