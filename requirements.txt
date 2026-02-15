@@ -1,0 +1,5 @@
+psycopg2==2.9.11
+pyside6==6.10.2
+pyside6-addons==6.10.2
+pyside6-essentials==6.10.2
+shiboken6==6.10.2
