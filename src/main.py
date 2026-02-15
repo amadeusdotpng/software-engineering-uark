@@ -1,7 +1,11 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
 
+from database import PlayerDatabase
+
 import sys
+
+
 
 # Team colors
 RED_MAIN_COLOR = QtGui.QColor(180, 30, 30)
@@ -12,8 +16,10 @@ WHITE = QtGui.QColor(255, 255, 255)
 DAKRGRAY = QtGui.QColor(60, 60, 60)
 
 class MainWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, db: PlayerDatabase):
         super().__init__()
+
+        self.db = db
 
         self.setWindowTitle("PHOTON - Start Screen")
         self.resize(720, 643)
@@ -76,15 +82,23 @@ class MainWindow(QtWidgets.QWidget):
         # TODO: actually start the game, currently just ends the program :P
         self.close()
 
-    def add_player(self, s):
+    def add_player(self):
         dlg = AddPlayerDialog(["Red Team", "Green Team"])
         if not dlg.exec():
             return
 
         player_id, equipment_id, team_name = dlg.get_data()
 
+        if self.db.player_exists(player_id):
+            codename = self.db.get_codename(player_id)
+        else:
+            dlg = AddCodenameDialog(player_id)
+            if not dlg.exec(): return
+            codename = dlg.get_data()
+            self.db.add_player(player_id, codename)
+
         assert team_name is not None
-        self.team_tables[team_name].add_player(player_id, "Not yet implemented!", equipment_id)
+        self.team_tables[team_name].add_player(player_id, codename, equipment_id)
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
@@ -228,13 +242,49 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
 
 class AddCodenameDialog(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, player_id):
         super().__init__()
+
+        self.setMinimumWidth(300)
+        self.setWindowTitle("Add Codename")
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        self.codename = None
+
+        self.label = QtWidgets.QLabel(f"Enter a codename for Player '{player_id}' ")
+        vlayout.addWidget(self.label)
+
+        self.codename_field = QtWidgets.QLineEdit()
+        self.codename_field.setPlaceholderText("Enter Codename...")
+        vlayout.addWidget(self.codename_field)
+
+        button_hlayout = QtWidgets.QHBoxLayout()
+        button_hlayout.addStretch()
+
+        button = QtWidgets.QDialogButtonBox(
+                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
+        button.accepted.connect(self.accept)
+        button.rejected.connect(self.reject)
+        button_hlayout.addWidget(button)
+
+        vlayout.addLayout(button_hlayout)
+
+        self.setLayout(vlayout)
+
+    def accept(self):
+        self.codename = self.codename_field.text()
+        super().accept()
+
+    def get_data(self) -> str | None:
+        return self.codename
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
-    window = MainWindow();
+    db = PlayerDatabase()
+    window = MainWindow(db);
     window.show()  # IMPORTANT!!!!! Windows are hidden by default.
 
     sys.exit(app.exec())
