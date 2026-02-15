@@ -96,7 +96,7 @@ class MainWindow(QtWidgets.QWidget):
         self.close()
 
     def add_player(self):
-        dlg = AddPlayerDialog(["Red Team", "Green Team"])
+        dlg = AddPlayerDialog(list(self.team_tables.keys()))
         if not dlg.exec():
             return
 
