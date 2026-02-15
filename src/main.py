@@ -5,7 +5,7 @@ from database import PlayerDatabase
 from network import Client, Server
 
 import sys
-
+import itertools
 
 
 # Team colors
@@ -52,9 +52,15 @@ class MainWindow(QtWidgets.QWidget):
 
         buttons_hlayout = QHBoxLayout()
 
+        # Add player
         self.add_player_button = QtWidgets.QPushButton("Add Player")
         self.add_player_button.clicked.connect(self.add_player)
         buttons_hlayout.addWidget(self.add_player_button)
+
+        # Change client address
+        self.change_udp_network_button = QtWidgets.QPushButton("Change UDP Network")
+        self.change_udp_network_button.clicked.connect(self.change_udp_network)
+        buttons_hlayout.addWidget(self.change_udp_network_button)
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
@@ -114,7 +120,13 @@ class MainWindow(QtWidgets.QWidget):
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
         self.client.send_equipment_id(equipment_id)
 
+    def change_udp_network(self):
+        dlg = ChangeUDPNetworkDialog(self.client.addr)
+        if not dlg.exec():
+            return
 
+        new_addr = dlg.get_data()
+        self.client.set_addr(new_addr)
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
@@ -184,6 +196,7 @@ class PlayerTable(QtWidgets.QWidget):
             item.setText(str(text))
 
         self.players_num += 1
+
 
 
 
@@ -298,6 +311,64 @@ class AddCodenameDialog(QtWidgets.QDialog):
 
     def get_data(self) -> str | None:
         return self.codename
+
+class ChangeUDPNetworkDialog(QtWidgets.QDialog):
+    # this assumes old_addr is formatted correctly.
+    def __init__(self, old_addr):
+        super().__init__()
+
+        self.setMaximumWidth(200)
+        self.setWindowTitle("Change UDP Network")
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        self.addr = None
+
+        self.label = QtWidgets.QLabel(f"Enter a new IPv4 address")
+        vlayout.addWidget(self.label)
+
+        old_addr_vals = old_addr.split('.')
+        addr_hlayout = QtWidgets.QHBoxLayout()
+        self.addr_fields = [QtWidgets.QLineEdit(text=old_addr_vals[i]) for i in range(4)]
+        dot_labels = [QtWidgets.QLabel(".") for _ in range(3)]
+        for xs in itertools.zip_longest(self.addr_fields, dot_labels):
+            for x in xs:
+                if x is None: continue
+                addr_hlayout.addWidget(x)
+
+        vlayout.addLayout(addr_hlayout)
+
+        button_hlayout = QtWidgets.QHBoxLayout()
+        button_hlayout.addStretch()
+
+        button = QtWidgets.QDialogButtonBox(
+                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
+        button.accepted.connect(self.accept)
+        button.rejected.connect(self.reject)
+        button_hlayout.addWidget(button)
+
+        vlayout.addLayout(button_hlayout)
+
+        self.setLayout(vlayout)
+
+    def accept(self):
+        try:
+            addrs = [int(field.text()) for field in self.addr_fields]
+            assert all(0 <= v <= 255 for v in addrs)
+            self.addr = ".".join(str(v) for v in addrs)
+        except Exception:
+            self.label.setText("Please use a valid IPv4 address")
+            self.label.setAutoFillBackground(True)
+            p = self.label.palette()
+            p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
+            self.label.setPalette(p)
+            return
+        
+        super().accept()
+
+    def get_data(self) -> str | None:
+        return self.addr
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
