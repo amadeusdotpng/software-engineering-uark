@@ -14,8 +14,6 @@ class PlayerDatabase:
             self.conn = psycopg2.connect(
                 dbname = "photon",
                 user = "student",
-                password = "student",
-                host = "localhost",
             )
             # Create cursor
             self.cursor = self.conn.cursor()
