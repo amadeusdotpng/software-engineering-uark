@@ -23,31 +23,40 @@ class MainWindow(QtWidgets.QWidget):
         title = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(title)
 
-        hlayout = QHBoxLayout()
-        hlayout.setSpacing(0)
-        hlayout.setContentsMargins(0, 0, 0, 0)
+        table_hlayout = QHBoxLayout()
+        table_hlayout.setSpacing(0)
+        table_hlayout.setContentsMargins(0, 0, 0, 0)
 
         # Player Tables
         self.red_table   = PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR)
         self.green_table = PlayerTable("GREEN TEAM", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR)
-        hlayout.addWidget(self.red_table, 0)
-        hlayout.addWidget(self.green_table, 0)
-        vlayout.addLayout(hlayout)
+        table_hlayout.addWidget(self.red_table, 0)
+        table_hlayout.addWidget(self.green_table, 0)
+        vlayout.addLayout(table_hlayout)
+
+
+        buttons_hlayout = QHBoxLayout()
+
+        self.add_player_button = QtWidgets.QPushButton("Add Player")
+        self.add_player_button.clicked.connect(self.add_player)
+        buttons_hlayout.addWidget(self.add_player_button)
 
         # Text input field
-        self.input_field = QtWidgets.QLineEdit()
-        self.input_field.setPlaceholderText("ENTER PLAYER ID...")
-        self.input_field.returnPressed.connect(self.enter_id)
-        vlayout.addWidget(self.input_field)
+        # self.input_field = QtWidgets.QLineEdit()
+        # self.input_field.setPlaceholderText("ENTER PLAYER ID...")
+        # self.input_field.returnPressed.connect(self.enter_id)
+        # vlayout.addWidget(self.input_field)
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
         self.button.clicked.connect(self.start_game)
-        vlayout.addWidget(self.button)
+        buttons_hlayout.addWidget(self.button)
+
+        vlayout.addLayout(buttons_hlayout)
 
         # Splash Screen
         # It's important that this is the last one initialized so that it shows up on top of everything.
-        pixmap = QtGui.QPixmap('res/splash_screen.jpg').scaled(self.width(), self.height())
+        pixmap = QtGui.QPixmap("res/splash_screen.jpg").scaled(self.width(), self.height())
         self.splash_screen = QtWidgets.QLabel(self)
         self.splash_screen.setPixmap(pixmap)
 
@@ -58,7 +67,7 @@ class MainWindow(QtWidgets.QWidget):
         self.splash_screen.show()
 
         # close splash screen after 3 seconds
-        QtCore.QTimer.singleShot(3000, self.splash_screen.close)
+        QtCore.QTimer.singleShot(1000, self.splash_screen.close)
 
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
@@ -71,20 +80,29 @@ class MainWindow(QtWidgets.QWidget):
         # TODO: actually start the game, currently just ends the program :P
         self.close()
 
-    def enter_id(self):
-        text = self.input_field.text()
-        try:
-            player_id = int(text)
-        except ValueError:
-            print("Invalid player ID: must be an integer")
-            self.input_field.clear()
+    def add_player(self, s):
+        dlg = AddPlayerDialog()
+        if not dlg.exec():
             return
 
-        # TODO: query the database here
-        # TODO: add option to which team a player should be added
-        self.red_table.add_player(player_id, "2", "3")
-        self.green_table.add_player(player_id, "2", "3")
-        self.input_field.clear()  # Clears the field after pressing enter
+        player_id, equipment_id = dlg.get_data()
+        self.red_table.add_player(player_id, "Not yet implemented!", equipment_id)
+        self.green_table.add_player(player_id, "Not yet implemented!", equipment_id)
+
+    # def enter_id(self):
+    #     text = self.input_field.text()
+    #     try:
+    #         player_id = int(text)
+    #     except ValueError:
+    #         print("Invalid player ID: must be an integer")
+    #         self.input_field.clear()
+    #         return
+
+    #     # TODO: query the database here
+    #     # TODO: add option to which team a player should be added
+    #     self.red_table.add_player(player_id, "2", "3")
+    #     self.green_table.add_player(player_id, "2", "3")
+    #     self.input_field.clear()  # Clears the field after pressing enter
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
@@ -154,6 +172,66 @@ class PlayerTable(QtWidgets.QWidget):
             item.setText(str(text))
 
         self.players_num += 1
+
+class AddPlayerDialog(QtWidgets.QDialog):
+    def __init__(self):
+        super().__init__()
+
+        self.setMinimumWidth(300)
+        self.setWindowTitle("Add Player")
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        self.player_id = None
+        self.equipment_id = None
+
+        self.warning_label = QtWidgets.QLabel("Enter the Player and Equipment IDs")
+        vlayout.addWidget(self.warning_label)
+
+        self.player_id_field = QtWidgets.QLineEdit()
+        self.player_id_field.setPlaceholderText("Enter Player ID...")
+        vlayout.addWidget(self.player_id_field)
+
+
+        self.equipment_id_field = QtWidgets.QLineEdit()
+        self.equipment_id_field.setPlaceholderText("Enter Equipment ID...")
+        vlayout.addWidget(self.equipment_id_field)
+
+        button_hlayout = QtWidgets.QHBoxLayout()
+        button_hlayout.addStretch()
+
+        button = QtWidgets.QDialogButtonBox(
+                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
+        button.accepted.connect(self.accept)
+        button.rejected.connect(self.reject)
+        button_hlayout.addWidget(button)
+
+        vlayout.addLayout(button_hlayout)
+
+        self.setLayout(vlayout)
+
+    def accept(self):
+        try:
+            self.player_id = int(self.player_id_field.text())
+            self.equipment_id = int(self.equipment_id_field.text())
+        except ValueError:
+            self.warning_label.setText("Player ID and Equipment ID must be integers!")
+            self.warning_label.setAutoFillBackground(True)
+            p = self.warning_label.palette()
+            p.setColor(self.warning_label.foregroundRole(), RED_MAIN_COLOR)
+            self.warning_label.setPalette(p)
+            return
+
+        super().accept()
+
+    def get_data(self) -> tuple[int | None, int | None]:
+        return (self.player_id, self.equipment_id)
+
+
+class AddCodenameDialog(QtWidgets.QDialog):
+    def __init__(self):
+        super().__init__()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
