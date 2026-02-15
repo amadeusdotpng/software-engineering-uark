@@ -33,7 +33,8 @@ class MainWindow(QtWidgets.QWidget):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        title = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
+        title = QtWidgets.QLabel("Edit Current Game")
+        title.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(title)
 
         table_hlayout = QHBoxLayout()
@@ -73,6 +74,7 @@ class MainWindow(QtWidgets.QWidget):
         # It's important that this is the last one initialized so that it shows up on top of everything.
         pixmap = QtGui.QPixmap("res/splash_screen.jpg").scaled(self.width(), self.height())
         self.splash_screen = QtWidgets.QLabel(self)
+        self.splash_screen.resize(self.width(), self.height())
         self.splash_screen.setPixmap(pixmap)
 
         self.setLayout(vlayout)
@@ -82,7 +84,7 @@ class MainWindow(QtWidgets.QWidget):
         self.splash_screen.show()
 
         # close splash screen after 3 seconds
-        QtCore.QTimer.singleShot(1000, self.splash_screen.close)
+        QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
@@ -102,11 +104,10 @@ class MainWindow(QtWidgets.QWidget):
 
         player_id, equipment_id, team_name = dlg.get_data()
         if player_id in self.player_equipment_id_map:
-            dlg = QtWidgets.QMessageBox(text=f"Player ID '{player_id}' has already been added!")
+            dlg = QtWidgets.QMessageBox()
+            dlg.setText(f"Player ID '{player_id}' has already been added!")
             dlg.exec()
             return
-
-        self.player_equipment_id_map[player_id] = equipment_id
 
         if self.db.player_exists(player_id):
             codename = self.db.get_codename(player_id)
@@ -117,6 +118,7 @@ class MainWindow(QtWidgets.QWidget):
             self.db.add_player(player_id, codename)
 
         assert team_name is not None
+        self.player_equipment_id_map[player_id] = equipment_id
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
         self.client.send_equipment_id(equipment_id)
 
@@ -268,7 +270,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
         super().accept()
 
-    def get_data(self) -> tuple[int | None, int | None, str | None]:
+    def get_data(self):
         return (self.player_id, self.equipment_id, self.team_name)
 
 
@@ -306,10 +308,17 @@ class AddCodenameDialog(QtWidgets.QDialog):
         self.setLayout(vlayout)
 
     def accept(self):
+        if not self.codename_field.text():
+            self.label.setText("Please enter a valid codename!")
+            self.label.setAutoFillBackground(True)
+            p = self.label.palette()
+            p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
+            self.label.setPalette(p)
+            return
         self.codename = self.codename_field.text()
         super().accept()
 
-    def get_data(self) -> str | None:
+    def get_data(self):
         return self.codename
 
 class ChangeUDPNetworkDialog(QtWidgets.QDialog):
@@ -358,7 +367,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
             assert all(0 <= v <= 255 for v in addrs)
             self.addr = ".".join(str(v) for v in addrs)
         except Exception:
-            self.label.setText("Please use a valid IPv4 address")
+            self.label.setText("Please use a valid IPv4 address!")
             self.label.setAutoFillBackground(True)
             p = self.label.palette()
             p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
@@ -367,7 +376,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
         
         super().accept()
 
-    def get_data(self) -> str | None:
+    def get_data(self):
         return self.addr
 
 if __name__ == '__main__':
