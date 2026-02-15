@@ -28,10 +28,12 @@ class MainWindow(QtWidgets.QWidget):
         table_hlayout.setContentsMargins(0, 0, 0, 0)
 
         # Player Tables
-        self.red_table   = PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR)
-        self.green_table = PlayerTable("GREEN TEAM", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR)
-        table_hlayout.addWidget(self.red_table, 0)
-        table_hlayout.addWidget(self.green_table, 0)
+        self.team_tables = {
+            "Red Team": PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR),
+            "Green Team": PlayerTable("GREEN TEAM", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR)
+        }
+        table_hlayout.addWidget(self.team_tables["Red Team"], 0)
+        table_hlayout.addWidget(self.team_tables["Green Team"], 0)
         vlayout.addLayout(table_hlayout)
 
 
@@ -81,13 +83,14 @@ class MainWindow(QtWidgets.QWidget):
         self.close()
 
     def add_player(self, s):
-        dlg = AddPlayerDialog()
+        dlg = AddPlayerDialog(["Red Team", "Green Team"])
         if not dlg.exec():
             return
 
-        player_id, equipment_id = dlg.get_data()
-        self.red_table.add_player(player_id, "Not yet implemented!", equipment_id)
-        self.green_table.add_player(player_id, "Not yet implemented!", equipment_id)
+        player_id, equipment_id, team_name = dlg.get_data()
+
+        assert team_name is not None
+        self.team_tables[team_name].add_player(player_id, "Not yet implemented!", equipment_id)
 
     # def enter_id(self):
     #     text = self.input_field.text()
@@ -174,7 +177,7 @@ class PlayerTable(QtWidgets.QWidget):
         self.players_num += 1
 
 class AddPlayerDialog(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, team_choices: list[str]):
         super().__init__()
 
         self.setMinimumWidth(300)
@@ -183,6 +186,8 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
         self.player_id = None
         self.equipment_id = None
+        self.team_name = None
+        self.team_choices = team_choices
 
         self.warning_label = QtWidgets.QLabel("Enter the Player and Equipment IDs")
         vlayout.addWidget(self.warning_label)
@@ -195,6 +200,19 @@ class AddPlayerDialog(QtWidgets.QDialog):
         self.equipment_id_field = QtWidgets.QLineEdit()
         self.equipment_id_field.setPlaceholderText("Enter Equipment ID...")
         vlayout.addWidget(self.equipment_id_field)
+
+
+        team_hlayout = QtWidgets.QHBoxLayout()
+        self.team_name_label = QtWidgets.QLabel("Team: ")
+        team_hlayout.addWidget(self.team_name_label)
+
+        self.team_name_dropdown = QtWidgets.QComboBox()
+        self.team_name_dropdown.insertItems(0, team_choices)
+        team_hlayout.addWidget(self.team_name_dropdown)
+
+        team_hlayout.addStretch()
+
+        vlayout.addLayout(team_hlayout)
 
         button_hlayout = QtWidgets.QHBoxLayout()
         button_hlayout.addStretch()
@@ -215,6 +233,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
         try:
             self.player_id = int(self.player_id_field.text())
             self.equipment_id = int(self.equipment_id_field.text())
+            self.team_name = self.team_choices[self.team_name_dropdown.currentIndex()]
         except ValueError:
             self.warning_label.setText("Player ID and Equipment ID must be integers!")
             self.warning_label.setAutoFillBackground(True)
@@ -225,8 +244,8 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
         super().accept()
 
-    def get_data(self) -> tuple[int | None, int | None]:
-        return (self.player_id, self.equipment_id)
+    def get_data(self) -> tuple[int | None, int | None, str | None]:
+        return (self.player_id, self.equipment_id, self.team_name)
 
 
 class AddCodenameDialog(QtWidgets.QDialog):
