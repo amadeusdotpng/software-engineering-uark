@@ -43,12 +43,6 @@ class MainWindow(QtWidgets.QWidget):
         self.add_player_button.clicked.connect(self.add_player)
         buttons_hlayout.addWidget(self.add_player_button)
 
-        # Text input field
-        # self.input_field = QtWidgets.QLineEdit()
-        # self.input_field.setPlaceholderText("ENTER PLAYER ID...")
-        # self.input_field.returnPressed.connect(self.enter_id)
-        # vlayout.addWidget(self.input_field)
-
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
         self.button.clicked.connect(self.start_game)
@@ -91,21 +85,6 @@ class MainWindow(QtWidgets.QWidget):
 
         assert team_name is not None
         self.team_tables[team_name].add_player(player_id, "Not yet implemented!", equipment_id)
-
-    # def enter_id(self):
-    #     text = self.input_field.text()
-    #     try:
-    #         player_id = int(text)
-    #     except ValueError:
-    #         print("Invalid player ID: must be an integer")
-    #         self.input_field.clear()
-    #         return
-
-    #     # TODO: query the database here
-    #     # TODO: add option to which team a player should be added
-    #     self.red_table.add_player(player_id, "2", "3")
-    #     self.green_table.add_player(player_id, "2", "3")
-    #     self.input_field.clear()  # Clears the field after pressing enter
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
