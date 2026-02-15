@@ -74,6 +74,7 @@ class MainWindow(QtWidgets.QWidget):
         # It's important that this is the last one initialized so that it shows up on top of everything.
         pixmap = QtGui.QPixmap("res/splash_screen.jpg").scaled(self.width(), self.height())
         self.splash_screen = QtWidgets.QLabel(self)
+        self.splash_screen.resize(self.width(), self.height())
         self.splash_screen.setPixmap(pixmap)
 
         self.setLayout(vlayout)
@@ -83,7 +84,7 @@ class MainWindow(QtWidgets.QWidget):
         self.splash_screen.show()
 
         # close splash screen after 3 seconds
-        QtCore.QTimer.singleShot(1000, self.splash_screen.close)
+        QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
