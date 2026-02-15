@@ -268,7 +268,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
         super().accept()
 
-    def get_data(self) -> tuple[int | None, int | None, str | None]:
+    def get_data(self):
         return (self.player_id, self.equipment_id, self.team_name)
 
 
@@ -309,7 +309,7 @@ class AddCodenameDialog(QtWidgets.QDialog):
         self.codename = self.codename_field.text()
         super().accept()
 
-    def get_data(self) -> str | None:
+    def get_data(self):
         return self.codename
 
 class ChangeUDPNetworkDialog(QtWidgets.QDialog):
@@ -367,7 +367,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
         
         super().accept()
 
-    def get_data(self) -> str | None:
+    def get_data(self):
         return self.addr
 
 if __name__ == '__main__':
