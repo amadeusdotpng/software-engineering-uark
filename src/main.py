@@ -33,7 +33,8 @@ class MainWindow(QtWidgets.QWidget):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        title = QtWidgets.QLabel("Edit Current Game", alignment=QtCore.Qt.AlignmentFlag.AlignHCenter)
+        title = QtWidgets.QLabel("Edit Current Game")
+        title.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(title)
 
         table_hlayout = QHBoxLayout()
@@ -102,7 +103,8 @@ class MainWindow(QtWidgets.QWidget):
 
         player_id, equipment_id, team_name = dlg.get_data()
         if player_id in self.player_equipment_id_map:
-            dlg = QtWidgets.QMessageBox(text=f"Player ID '{player_id}' has already been added!")
+            dlg = QtWidgets.QMessageBox()
+            dlg.setText(f"Player ID '{player_id}' has already been added!")
             dlg.exec()
             return
 
