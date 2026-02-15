@@ -2,6 +2,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
 
 from database import PlayerDatabase
+from network import Client, Server
 
 import sys
 
@@ -20,6 +21,11 @@ class MainWindow(QtWidgets.QWidget):
         super().__init__()
 
         self.db = db
+        self.client = Client()
+
+        # doesn't need to be used yet!
+        # self.server = Server()
+
         self.player_equipment_id_map = {}
 
         self.setWindowTitle("PHOTON - Start Screen")
@@ -106,6 +112,7 @@ class MainWindow(QtWidgets.QWidget):
 
         assert team_name is not None
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
+        self.client.send_equipment_id(equipment_id)
 
 
 
