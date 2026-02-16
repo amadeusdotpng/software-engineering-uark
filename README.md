@@ -20,9 +20,9 @@ cd software-engineering-uark
 ```
 ---------------
 
-- Run `./install` to make the Python venv and install necessary Python packages
+- Run `./install.sh` to make the Python venv and install necessary Python packages
 
-- Run `./run` to run the program
+- Run `./run.sh` to run the program
 
 
 ## Student Accounts
