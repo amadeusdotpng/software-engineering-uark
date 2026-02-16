@@ -1,8 +1,5 @@
 # Photon
 
-
-
-
 ## Install
 
 ### For Mac based Debian VM:
@@ -23,9 +20,9 @@ cd software-engineering-uark
 ```
 ---------------
 
-- Run ./install to make the Python VEnv and intall necessary Python packages
+- Run `./install` to make the Python venv and install necessary Python packages
 
-- Run ./run to run the program
+- Run `./run` to run the program
 
 
 ## Student Accounts
