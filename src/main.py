@@ -48,6 +48,10 @@ class MainWindow(QtWidgets.QWidget):
         table_hlayout.setSpacing(0)
         table_hlayout.setContentsMargins(0, 0, 0, 0)
 
+        # Keyboard Actions # TODO: delete this
+        # self.key_label = QLabel("Last Key Pressed: None", self) # Asking for central widget; is one required?
+        # self.key_label.setGeometry(10, 10, 200, 30)
+
         # Player Tables
         self.team_tables = {
             "Red Team": PlayerTable("RED TEAM", RED_MAIN_COLOR, RED_SECONDARY_COLOR),
@@ -114,6 +118,7 @@ class MainWindow(QtWidgets.QWidget):
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
+        super().keyPressEvent(event)
         # if isinstance(event, QKeyEvent):
         #     print(f"Key Released: {event.text()}")
         return
@@ -145,6 +150,11 @@ class MainWindow(QtWidgets.QWidget):
             self.game.show()
             self.hide()
             self.client.send_game_start()
+            print("Starting game!")
+            self.start_game()
+
+        # if isinstance(event, QKeyEvent):
+        #     print(f"Last Key Pressed: {event.text()}")
 
     # Networking and Database
     def add_player(self):
