@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
+from PySide6.QtGui import QKeyEvent
 
 from database import PlayerDatabase
 from network import Client, Server
@@ -17,6 +18,7 @@ WHITE = QtGui.QColor(255, 255, 255)
 DAKRGRAY = QtGui.QColor(60, 60, 60)
 
 class MainWindow(QtWidgets.QWidget):
+    # Initialization and key functions
     def __init__(self, db: PlayerDatabase):
         super().__init__()
 
@@ -40,6 +42,10 @@ class MainWindow(QtWidgets.QWidget):
         table_hlayout = QHBoxLayout()
         table_hlayout.setSpacing(0)
         table_hlayout.setContentsMargins(0, 0, 0, 0)
+
+        # Keyboard Actions # TODO: delete this
+        # self.key_label = QLabel("Last Key Pressed: None", self) # Asking for central widget; is one required?
+        # self.key_label.setGeometry(10, 10, 200, 30)
 
         # Player Tables
         self.team_tables = {
@@ -93,10 +99,26 @@ class MainWindow(QtWidgets.QWidget):
             self.splash_screen.setPixmap(pixmap)
             self.splash_screen.resize(self.width(), self.height())
 
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        if event.key() == QtCore.Qt.Key.Key_F5:
+            print("Starting game!")
+            self.start_game()
+
+        super().keyPressEvent(event)
+        # if isinstance(event, QKeyEvent):
+        #     print(f"Last Key Pressed: {event.text()}")
+
+    def keyReleaseEvent(self, event):
+        # if isinstance(event, QKeyEvent):
+        #     print(f"Key Released: {event.text()}")
+        return
+
+    # Game management
     def start_game(self):
         # TODO: actually start the game, currently just ends the program :P
         self.close()
 
+    # Networking and Database
     def add_player(self):
         dlg = AddPlayerDialog(list(self.team_tables.keys()))
         if not dlg.exec():
@@ -146,7 +168,7 @@ class PlayerTable(QtWidgets.QWidget):
         # Set dimensions
         self.player_table.setRowCount(20)
         self.player_table.setColumnCount(3)
-        
+
         # Table will fit the screen horizontally
         self.player_table.horizontalHeader().setStretchLastSection(True)
         self.player_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -244,7 +266,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -296,7 +318,7 @@ class AddCodenameDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -350,7 +372,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -373,7 +395,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
             p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
             self.label.setPalette(p)
             return
-        
+
         super().accept()
 
     def get_data(self):
