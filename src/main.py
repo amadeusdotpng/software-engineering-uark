@@ -1,10 +1,14 @@
+# UI/Rendering imports
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
 from PySide6.QtGui import QKeyEvent
 
+# Database imports
 from database import PlayerDatabase
 from network import Client, Server
+from game import Game
 
+# Miscellaneous imports
 import sys
 import itertools
 
@@ -24,6 +28,8 @@ class MainWindow(QtWidgets.QWidget):
 
         self.db = db
         self.client = Client()
+
+        self.game = Game()
 
         # doesn't need to be used yet!
         # self.server = Server()
@@ -67,7 +73,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
-        self.button.clicked.connect(self.start_game)
+        self.button.clicked.connect(self.startGame)
         buttons_hlayout.addWidget(self.button)
 
         vlayout.addLayout(buttons_hlayout)
@@ -88,6 +94,10 @@ class MainWindow(QtWidgets.QWidget):
         # close splash screen after 3 seconds
         QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
+    # Window functionality
+    def newGame(self, checked):
+        self.game.show()
+
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
         if self.splash_screen.isVisible():
@@ -97,8 +107,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         if event.key() == QtCore.Qt.Key.Key_F5:
-            print("Starting game!")
-            self.start_game()
+            self.startGame()
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
@@ -107,9 +116,12 @@ class MainWindow(QtWidgets.QWidget):
         return
 
     # Game management
-    def start_game(self):
-        # TODO: actually start the game, currently just ends the program :P
-        self.close()
+    def startGame(self):
+        if self.game.isVisible():
+            print("Im doing nothing")
+        else:
+            self.game.show()
+            self.hide()
 
     # Networking and Database
     def add_player(self):
