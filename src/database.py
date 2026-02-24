@@ -43,7 +43,7 @@ class PlayerDatabase:
             WHERE id = %s;
         ''', (id,))
         return self.cursor.fetchone()[0]
-    
+
     # Returns True if a player with a given ID already exists in the database
     def player_exists(self, id):
         self.cursor.execute('''
@@ -60,7 +60,7 @@ class PlayerDatabase:
             WHERE id = %s;
         ''', (id,))
         return self.cursor.fetchone() # Returns a tuple formatted (id, codename)
-    
+
     # Update an existing player's codename
     def update_player(self, id, new_codename):
         self.cursor.execute('''
@@ -102,7 +102,7 @@ class PlayerDatabase:
 #             # If it doesn't, prompt user for codename
 #             print("Player does not exist.")
 #             codename = input("Enter a codename: ")
-            
+
 #             # Add new entry into the database
 #             test_db.add_player(player_id, codename)
 
@@ -114,6 +114,6 @@ class PlayerDatabase:
 #         test_db.display_players()
 #     except Exception as error:
 #         print(f"Error connecting to database: {error}")
-    
+
 #     # Close database
 #     test_db.close()
