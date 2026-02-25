@@ -66,6 +66,11 @@ class MainWindow(QtWidgets.QWidget):
         self.add_player_button.clicked.connect(self.add_player)
         buttons_hlayout.addWidget(self.add_player_button)
 
+        # Clear player entries
+        self.clear_game_button = QtWidgets.QPushButton("Clear Game")
+        self.clear_game_button.clicked.connect(self.clear_game)
+        buttons_hlayout.addWidget(self.clear_game_button)
+
         # Change client address
         self.change_udp_network_button = QtWidgets.QPushButton("Change UDP Network")
         self.change_udp_network_button.clicked.connect(self.change_udp_network)
@@ -156,6 +161,10 @@ class MainWindow(QtWidgets.QWidget):
 
         new_addr = dlg.get_data()
         self.client.set_addr(new_addr)
+
+    def clear_game(self):
+        # TODO: implement function to clear all player entries from the table
+        return -1
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
