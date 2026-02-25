@@ -57,7 +57,6 @@ class MainWindow(QtWidgets.QWidget):
         table_hlayout.addWidget(self.team_tables["Green Team"], 0)
         vlayout.addLayout(table_hlayout)
 
-
         buttons_hlayout = QHBoxLayout()
 
         # Add player button
@@ -201,7 +200,7 @@ class PlayerTable(QtWidgets.QWidget):
         self.player_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers) # Disable editing of table
 
         # Set dimensions
-        self.player_table.setRowCount(20)
+        self.player_table.setRowCount(22)
         self.player_table.setColumnCount(3)
 
         # Table will fit the screen horizontally
@@ -265,7 +264,6 @@ class PlayerTable(QtWidgets.QWidget):
                     item.setText("")
         # resets player count technically
         self.players_num = 0
-
 
 
 
@@ -388,6 +386,8 @@ class AddCodenameDialog(QtWidgets.QDialog):
 
     def get_data(self):
         return self.codename
+
+
 
 class ChangeUDPNetworkDialog(QtWidgets.QDialog):
     # this assumes old_addr is formatted correctly.
