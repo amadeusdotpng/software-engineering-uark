@@ -73,7 +73,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
-        self.button.clicked.connect(self.startGame)
+        self.button.clicked.connect(self.start_game)
         buttons_hlayout.addWidget(self.button)
 
         vlayout.addLayout(buttons_hlayout)
@@ -107,7 +107,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         if event.key() == QtCore.Qt.Key.Key_F5:
-            self.startGame()
+            self.start_game()
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
@@ -116,7 +116,7 @@ class MainWindow(QtWidgets.QWidget):
         return
 
     # Game management
-    def startGame(self):
+    def start_game(self):
         if self.game.isVisible():
             print("Im doing nothing")
         else:
