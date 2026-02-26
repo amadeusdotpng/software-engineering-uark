@@ -451,7 +451,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
     db = PlayerDatabase()
-    window = MainWindow(db);
+    window = MainWindow(db)
     window.show()  # IMPORTANT!!!!! Windows are hidden by default.
 
     sys.exit(app.exec())
