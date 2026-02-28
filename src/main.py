@@ -136,7 +136,12 @@ class MainWindow(QtWidgets.QWidget):
         self.client.set_addr(new_addr)
 
     def clear_game(self):
-        # TODO: implement function to clear all player entries from the table
+        # clears players from the table/screen, but not from the database
+        for table in self.team_tables.values():
+            table.clear_players()
+        self.player_equipment_id_map.clear()
+
+        
         return -1
 
 class PlayerTable(QtWidgets.QWidget):
@@ -207,6 +212,17 @@ class PlayerTable(QtWidgets.QWidget):
             item.setText(str(text))
 
         self.players_num += 1
+
+    # clears player entries, leaves other stuff
+    def clear_players(self): 
+        for row in range(2, self.player_table.rowCount()):
+            for col in range(self.player_table.columnCount()):
+                item = self.player_table.item(row, col)
+                if item:
+                    item.setText("")
+        # resets player count technically
+        self.players_num = 0
+
 
 
 
