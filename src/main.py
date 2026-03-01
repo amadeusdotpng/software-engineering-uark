@@ -1,9 +1,14 @@
+# UI/Rendering imports
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
+from PySide6.QtGui import QKeyEvent
 
+# Database imports
 from database import PlayerDatabase
 from network import Client, Server
+from game import Game
 
+# Miscellaneous imports
 import sys
 import itertools
 
@@ -17,11 +22,14 @@ WHITE = QtGui.QColor(255, 255, 255)
 DAKRGRAY = QtGui.QColor(60, 60, 60)
 
 class MainWindow(QtWidgets.QWidget):
+    # Initialization and key functions
     def __init__(self, db: PlayerDatabase):
         super().__init__()
 
         self.db = db
         self.client = Client()
+
+        self.game = Game()
 
         # doesn't need to be used yet!
         # self.server = Server()
@@ -86,6 +94,10 @@ class MainWindow(QtWidgets.QWidget):
         # close splash screen after 3 seconds
         QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
+    # Window functionality
+    def newGame(self, checked):
+        self.game.show()
+
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
         if self.splash_screen.isVisible():
@@ -93,10 +105,25 @@ class MainWindow(QtWidgets.QWidget):
             self.splash_screen.setPixmap(pixmap)
             self.splash_screen.resize(self.width(), self.height())
 
-    def start_game(self):
-        # TODO: actually start the game, currently just ends the program :P
-        self.close()
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        if event.key() == QtCore.Qt.Key.Key_F5:
+            self.start_game()
+        super().keyPressEvent(event)
 
+    def keyReleaseEvent(self, event):
+        # if isinstance(event, QKeyEvent):
+        #     print(f"Key Released: {event.text()}")
+        return
+
+    # Game management
+    def start_game(self):
+        if self.game.isVisible():
+            print("Im doing nothing")
+        else:
+            self.game.show()
+            self.hide()
+
+    # Networking and Database
     def add_player(self):
         dlg = AddPlayerDialog(list(self.team_tables.keys()))
         if not dlg.exec():
@@ -146,7 +173,7 @@ class PlayerTable(QtWidgets.QWidget):
         # Set dimensions
         self.player_table.setRowCount(20)
         self.player_table.setColumnCount(3)
-        
+
         # Table will fit the screen horizontally
         self.player_table.horizontalHeader().setStretchLastSection(True)
         self.player_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -244,7 +271,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -296,7 +323,7 @@ class AddCodenameDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -350,7 +377,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
         button_hlayout.addStretch()
 
         button = QtWidgets.QDialogButtonBox(
-                QtWidgets.QDialogButtonBox.StandardButton.Ok | 
+                QtWidgets.QDialogButtonBox.StandardButton.Ok |
                 QtWidgets.QDialogButtonBox.StandardButton.Cancel
         )
         button.accepted.connect(self.accept)
@@ -373,7 +400,7 @@ class ChangeUDPNetworkDialog(QtWidgets.QDialog):
             p.setColor(self.label.foregroundRole(), RED_MAIN_COLOR)
             self.label.setPalette(p)
             return
-        
+
         super().accept()
 
     def get_data(self):
