@@ -77,7 +77,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
-        self.button.clicked.connect(self.start_game)
+        self.button.clicked.connect(self.countdown)
         buttons_hlayout.addWidget(self.button)
 
         vlayout.addLayout(buttons_hlayout)
@@ -119,15 +119,33 @@ class MainWindow(QtWidgets.QWidget):
         #     print(f"Key Released: {event.text()}")
         return
 
+    def countdown(self):
+        # Initialize starting time and timer
+        self.countdown = 30
+        self.timer = QtCore.QTimer(self)
+
+        # Reduce countdown variable by one every 1000 ms
+        self.button.setText(str(self.countdown)+ " seconds until game start...")
+        self.timer.start(1000)
+        self.timer.timeout.connect(self.update_time)
+
+    def update_time(self):
+        # Update button text and decrement countdown
+        self.countdown = self.countdown - 1
+        self.button.setText(str(self.countdown) + " seconds until game start...")
+
+        # Stop timer and start game once 30 seconds have passed
+        if self.countdown <= 0:
+            self.timer.stop()
+            self.start_game()
+
     # Game management
     def start_game(self):
-        # Start countdown timer
-        
-
         # Open new window for game action screen
         if not self.game.isVisible():
             self.game.show()
             self.hide()
+            self.client.send_game_start()
 
     # Networking and Database
     def add_player(self):

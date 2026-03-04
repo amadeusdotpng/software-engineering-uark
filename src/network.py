@@ -1,6 +1,5 @@
 import socket
 
-
 # sends stuff
 class Client:
     SEND_PORT = 7500
@@ -17,6 +16,10 @@ class Client:
         # maybe remove this eventually
         print(f"sending Equipment ID '{equipment_id}' to {(self.addr, self.SEND_PORT)}")
         self.sock.sendto(str(equipment_id).encode(), (self.addr, self.SEND_PORT))
+
+    def send_game_start(self):
+        print("Game has started, broadcasting code 202")
+        self.sock.sendto(str(202).encode(), (self.addr, self.SEND_PORT))
 
 # receives stuff
 class Server:
