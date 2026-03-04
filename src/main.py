@@ -3,7 +3,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
 from PySide6.QtGui import QKeyEvent
 
-# Database imports
+# Custom class imports
 from database import PlayerDatabase
 from network import Client, Server
 from game import Game
@@ -28,7 +28,6 @@ class MainWindow(QtWidgets.QWidget):
 
         self.db = db
         self.client = Client()
-
         self.game = Game()
 
         # doesn't need to be used yet!
@@ -61,12 +60,12 @@ class MainWindow(QtWidgets.QWidget):
 
         buttons_hlayout = QHBoxLayout()
 
-        # Add player
+        # Add player button
         self.add_player_button = QtWidgets.QPushButton("Add Player")
         self.add_player_button.clicked.connect(self.add_player)
         buttons_hlayout.addWidget(self.add_player_button)
 
-        # Change client address
+        # Change client address button
         self.change_udp_network_button = QtWidgets.QPushButton("Change UDP Network")
         self.change_udp_network_button.clicked.connect(self.change_udp_network)
         buttons_hlayout.addWidget(self.change_udp_network_button)
@@ -91,7 +90,7 @@ class MainWindow(QtWidgets.QWidget):
         super().showEvent(event)
         self.splash_screen.show()
 
-        # close splash screen after 3 seconds
+        # Close splash screen after 3 seconds
         QtCore.QTimer.singleShot(3000, self.splash_screen.close)
 
     # Window functionality
@@ -117,9 +116,11 @@ class MainWindow(QtWidgets.QWidget):
 
     # Game management
     def start_game(self):
-        if self.game.isVisible():
-            print("Im doing nothing")
-        else:
+        # Start countdown timer
+        
+
+        # Open new window for game action screen
+        if not self.game.isVisible():
             self.game.show()
             self.hide()
 
