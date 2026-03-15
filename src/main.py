@@ -66,6 +66,11 @@ class MainWindow(QtWidgets.QWidget):
         self.add_player_button.clicked.connect(self.add_player)
         buttons_hlayout.addWidget(self.add_player_button)
 
+        # Clear player entries
+        self.clear_game_button = QtWidgets.QPushButton("Clear Game")
+        self.clear_game_button.clicked.connect(self.clear_game)
+        buttons_hlayout.addWidget(self.clear_game_button)
+
         # Change client address
         self.change_udp_network_button = QtWidgets.QPushButton("Change UDP Network")
         self.change_udp_network_button.clicked.connect(self.change_udp_network)
@@ -157,6 +162,12 @@ class MainWindow(QtWidgets.QWidget):
         new_addr = dlg.get_data()
         self.client.set_addr(new_addr)
 
+    def clear_game(self):
+        # clears players from the table/screen, but not from the database
+        for table in self.team_tables.values(): # for in table
+            table.clear_players() # clears
+        self.player_equipment_id_map.clear() 
+
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
         super().__init__()
@@ -225,6 +236,17 @@ class PlayerTable(QtWidgets.QWidget):
             item.setText(str(text))
 
         self.players_num += 1
+
+    # clears player entries, leaves other stuff
+    def clear_players(self): 
+        for row in range(2, self.player_table.rowCount()):
+            for col in range(self.player_table.columnCount()):
+                item = self.player_table.item(row, col)
+                if item:
+                    item.setText("")
+        # resets player count technically
+        self.players_num = 0
+
 
 
 
