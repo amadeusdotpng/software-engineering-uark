@@ -25,12 +25,13 @@ class EntryTerminal(QtWidgets.QWidget):
         # doesn't need to be used yet!
         # self.server = Server()
 
-        self.teams = {
+        self.teams: dict[str, dict[int, tuple[int, str]]] = {
+            # player id : (equipment id, codename)
             "Red Team": {},
             "Green Team": {},
         }
 
-        self.game = Game(self.teams)
+        self.game = Game()
 
         self.setWindowTitle("PHOTON - Start Screen")
         self.resize(720, 643)
@@ -118,6 +119,8 @@ class EntryTerminal(QtWidgets.QWidget):
         if self.game.isVisible():
             print("Im doing nothing")
         else:
+            for team_name, team_data in self.teams.items():
+                self.game.set_team(team_name, team_data)
             self.game.show()
             self.hide()
 
@@ -162,7 +165,12 @@ class EntryTerminal(QtWidgets.QWidget):
             codename = dlg.get_data()
             self.db.add_player(player_id, codename)
 
+        # to make my typechecker happy
         assert team_name is not None
+        assert player_id is not None
+        assert equipment_id is not None
+        assert isinstance(codename, str)
+
         self.teams[team_name][player_id] = (equipment_id, codename)
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
         self.client.send_equipment_id(equipment_id)

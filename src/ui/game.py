@@ -7,7 +7,7 @@ from ui.colors import *
 
 class Game(QtWidgets.QWidget):
     # Initialization and key functions
-    def __init__(self, teams: dict[str, dict[int, tuple[int, str]]]):
+    def __init__(self):
         super().__init__()
 
         self.setWindowTitle("PHOTON - Game")
@@ -31,13 +31,11 @@ class Game(QtWidgets.QWidget):
                 "RED TEAM",
                 RED_MAIN_COLOR,
                 RED_SECONDARY_COLOR,
-                { k: v[1] for k, v in teams["Red Team"].items() }
             ),
             "Green Team": LeaderboardTable(
                 "GREEN TEAM",
                 GREEN_MAIN_COLOR,
                 GREEN_SECONDARY_COLOR,
-                { k: v[1] for k, v in teams["Green Team"].items() }
             ),
         }
         leaderboard_hlayout.addWidget(self.leaderboard_tables["Red Team"])
@@ -53,13 +51,15 @@ class Game(QtWidgets.QWidget):
 
         self.setLayout(vlayout)
 
+    def set_team(self, team_name: str, team_data: dict[int, tuple[int, str]]):
+        self.leaderboard_tables[team_name].set_team(team_data)
+
 class LeaderboardTable(QtWidgets.QWidget):
     def __init__(
         self,
         team_name: str,
         team_primary_color: QtGui.QColor,
         team_secondary_color: QtGui.QColor,
-        team: dict[int, str],
     ):
         super().__init__()
         self.team_name = team_name
@@ -105,16 +105,6 @@ class LeaderboardTable(QtWidgets.QWidget):
                 item.setForeground(WHITE)
                 self.leaderboard_table.setItem(row, col, item)
 
-        # TODO: map player_id to row in leaderboard
-        # fill in team data
-        for row, codename in enumerate(team.values()):
-            player_col = self.leaderboard_table.item(2+row, 0)
-            score_col  = self.leaderboard_table.item(2+row, 1)
-
-            assert player_col is not None and score_col is not None
-            player_col.setText(codename)
-            score_col.setText("0")
-
         layout.addWidget(self.leaderboard_table)
 
         # TODO: implement this!
@@ -125,6 +115,19 @@ class LeaderboardTable(QtWidgets.QWidget):
         layout.addWidget(total_score_label)
 
         self.setLayout(layout)
+
+    def set_team(self, team: dict[int, tuple[int, str]]):
+        # TODO: map player_id to row in leaderboard
+        # fill in team data
+        for row, (_, codename) in enumerate(team.values()):
+            player_col = self.leaderboard_table.item(2+row, 0)
+            score_col  = self.leaderboard_table.item(2+row, 1)
+
+            assert player_col is not None and score_col is not None
+            player_col.setText(codename)
+            score_col.setText("0")
+
+
 
 # TODO: implement this!
 # this does nothing yet because we haven't implemented being able to receive
