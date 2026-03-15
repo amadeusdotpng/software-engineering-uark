@@ -1,0 +1,9 @@
+from PySide6 import QtGui
+
+# Team colors
+RED_MAIN_COLOR = QtGui.QColor(180, 30, 30)
+RED_SECONDARY_COLOR = QtGui.QColor(210, 70, 70)
+GREEN_MAIN_COLOR = QtGui.QColor(30, 130, 30)
+GREEN_SECONDARY_COLOR = QtGui.QColor(60, 170, 60)
+WHITE = QtGui.QColor(255, 255, 255)
+DAKRGRAY = QtGui.QColor(60, 60, 60)
