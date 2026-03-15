@@ -3,6 +3,8 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
 from PySide6.QtGui import QKeyEvent
 
+from ui.colors import *
+
 class AddPlayerDialog(QtWidgets.QDialog):
     def __init__(self, team_choices: list[str]):
         super().__init__()

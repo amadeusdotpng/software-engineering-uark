@@ -22,12 +22,15 @@ class EntryTerminal(QtWidgets.QWidget):
         self.db = db
         self.client = Client()
 
-        self.game = Game()
-
         # doesn't need to be used yet!
         # self.server = Server()
 
-        self.player_equipment_id_map = {}
+        self.teams = {
+            "Red Team": {},
+            "Green Team": {},
+        }
+
+        self.game = Game(self.teams)
 
         self.setWindowTitle("PHOTON - Start Screen")
         self.resize(720, 643)
@@ -145,7 +148,7 @@ class EntryTerminal(QtWidgets.QWidget):
             return
 
         player_id, equipment_id, team_name = dlg.get_data()
-        if player_id in self.player_equipment_id_map:
+        if player_id in self.teams:
             dlg = QtWidgets.QMessageBox()
             dlg.setText(f"Player ID '{player_id}' has already been added!")
             dlg.exec()
@@ -160,7 +163,7 @@ class EntryTerminal(QtWidgets.QWidget):
             self.db.add_player(player_id, codename)
 
         assert team_name is not None
-        self.player_equipment_id_map[player_id] = equipment_id
+        self.teams[team_name][player_id] = (equipment_id, codename)
         self.team_tables[team_name].add_player(player_id, codename, equipment_id)
         self.client.send_equipment_id(equipment_id)
 
