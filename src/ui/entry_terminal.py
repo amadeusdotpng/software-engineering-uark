@@ -188,7 +188,8 @@ class EntryTerminal(QtWidgets.QWidget):
         # clears players from the table/screen, but not from the database
         for table in self.team_tables.values(): # for in table
             table.clear_players() # clears
-        self.player_equipment_id_map.clear() 
+        self.teams["Red Team"].clear() 
+        self.teams["Green Team"].clear() 
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
