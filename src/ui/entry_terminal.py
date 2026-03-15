@@ -74,7 +74,7 @@ class EntryTerminal(QtWidgets.QWidget):
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
-        self.button.clicked.connect(self.start_game)
+        self.button.clicked.connect(self.countdown)
         buttons_hlayout.addWidget(self.button)
 
         vlayout.addLayout(buttons_hlayout)
@@ -123,24 +123,25 @@ class EntryTerminal(QtWidgets.QWidget):
                 self.game.set_team(team_name, team_data)
             self.game.show()
             self.hide()
+            self.client.send_game_start()
 
     def countdown(self):
         # Initialize starting time and timer
-        self.countdown = 30
+        self.countdown_time = 30
         self.timer = QtCore.QTimer(self)
 
         # Reduce countdown variable by one every 1000 ms
-        self.button.setText(str(self.countdown)+ " seconds until game start...")
+        self.button.setText(str(self.countdown_time)+ " seconds until game start...")
         self.timer.start(1000)
         self.timer.timeout.connect(self.update_time)
 
     def update_time(self):
         # Update button text and decrement countdown
-        self.countdown = self.countdown - 1
-        self.button.setText(str(self.countdown) + " seconds until game start...")
+        self.countdown_time = self.countdown_time - 1
+        self.button.setText(str(self.countdown_time) + " seconds until game start...")
 
         # Stop timer and start game once 30 seconds have passed
-        if self.countdown <= 0:
+        if self.countdown_time <= 0:
             self.timer.stop()
             self.start_game()
 
