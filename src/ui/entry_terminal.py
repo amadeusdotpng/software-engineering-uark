@@ -7,23 +7,10 @@ from ui.colors import *
 from ui.dialogs import AddCodenameDialog, AddPlayerDialog, ChangeUDPNetworkDialog
 from ui.game import Game
 
-# Database
-from database import PlayerDatabase
-
-# Networking
-from network import Client, Server
-
-
 class EntryTerminal(QtWidgets.QWidget):
     # Initialization and key functions
-    def __init__(self, db: PlayerDatabase):
+    def __init__(self):
         super().__init__()
-
-        self.db = db
-        self.client = Client()
-
-        # doesn't need to be used yet!
-        # self.server = Server()
 
         self.teams: dict[str, dict[int, tuple[int, str]]] = {
             # player id : (equipment id, codename)

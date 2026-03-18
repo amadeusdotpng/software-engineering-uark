@@ -1,7 +1,7 @@
 import socket
 
 # sends stuff
-class Client:
+class NetSend:
     SEND_PORT = 7500
     def __init__(self, addr="127.0.0.1"):
         self.addr = addr
@@ -22,7 +22,7 @@ class Client:
         self.sock.sendto(str(202).encode(), (self.addr, self.SEND_PORT))
 
 # receives stuff
-class Server:
+class NetRecv:
     RECV_PORT   = 7501
     BUFFER_SIZE = 1024
     ADDR = "0.0.0.0" # receive from any connection
