@@ -1,6 +1,7 @@
 # UI/Rendering imports
 from PySide6.QtWidgets import QApplication
 
+from ui.colors import *
 from network import NetSend, NetRecv
 from database import PlayerDatabase
 from photon import PhotonClient
@@ -14,12 +15,16 @@ if __name__ == '__main__':
     database = PlayerDatabase()
     client = NetSend()
     server = NetRecv()
+    teams = [
+        ("Red", RED_MAIN_COLOR, RED_SECONDARY_COLOR),
+        ("Green", GREEN_MAIN_COLOR, GREEN_SECONDARY_COLOR),
+    ]
 
     photon = PhotonClient(
         database,
         client,
         server,
-        ["Red", "Green"]
+        teams
     )
 
     sys.exit(app.exec())
