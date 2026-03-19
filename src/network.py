@@ -7,7 +7,7 @@ class NetSend:
         self.addr = addr
         self.sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-    def set_addr(self, addr):
+    def set_addr(self, addr: str):
         # maybe remove this eventually
         print(f"changing network address from {self.addr} to {addr}")
         self.addr = addr

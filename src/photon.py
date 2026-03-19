@@ -1,7 +1,7 @@
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
 
-from ui import EntryWindow, GameWindow, AddPlayerDialog, AddCodenameDialog
+from ui import EntryWindow, GameWindow, AddPlayerDialog, AddCodenameDialog, ChangeUDPNetworkDialog
 from network import NetSend, NetRecv
 from database import PlayerDatabase
 
@@ -27,6 +27,7 @@ class PhotonClient:
         # UI stuff
         self.entry_window = EntryWindow(teams)
         self.entry_window.add_player_signal.connect(self.add_player)
+        self.entry_window.clear_players_signal.connect(self.clear_players)
 
         self.game_window = GameWindow()
 
@@ -75,6 +76,20 @@ class PhotonClient:
         self.net_send.send_equipment_id(equipment_id)
 
         self.entry_window.add_player(team_name, player_id, equipment_id, codename)
+
+    def clear_players(self):
+        for team in self.teams.values():
+            team.clear()
+
+    def change_udp_network(self):
+        dlg = ChangeUDPNetworkDialog(self.net_send.addr)
+        if not dlg.exec():
+            return
+        
+        new_addr = dlg.get_data()
+
+        assert new_addr is not None
+        self.net_send.set_addr(new_addr)
 
 class PhotonPlayer:
     def __init__(

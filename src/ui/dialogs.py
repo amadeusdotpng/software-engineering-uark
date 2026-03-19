@@ -5,6 +5,8 @@ from PySide6.QtGui import QKeyEvent
 
 from ui.colors import *
 
+import itertools
+
 class AddPlayerDialog(QtWidgets.QDialog):
     def __init__(self, team_choices: list[str]):
         super().__init__()
@@ -79,7 +81,7 @@ class AddPlayerDialog(QtWidgets.QDialog):
 
 
 class AddCodenameDialog(QtWidgets.QDialog):
-    def __init__(self, player_id):
+    def __init__(self, player_id: int):
         super().__init__()
 
         self.setMinimumWidth(300)
@@ -128,7 +130,7 @@ class AddCodenameDialog(QtWidgets.QDialog):
 
 class ChangeUDPNetworkDialog(QtWidgets.QDialog):
     # this assumes old_addr is formatted correctly.
-    def __init__(self, old_addr):
+    def __init__(self, old_addr: str):
         super().__init__()
 
         self.setMaximumWidth(200)

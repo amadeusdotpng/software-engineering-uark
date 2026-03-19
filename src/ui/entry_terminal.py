@@ -9,6 +9,8 @@ from ui.colors import *
 
 class EntryWindow(QtWidgets.QWidget):
     add_player_signal = QtCore.Signal()
+    clear_players_signal = QtCore.Signal()
+    change_net_addr_signal = QtCore.Signal()
 
     def __init__(
         self,
@@ -49,14 +51,16 @@ class EntryWindow(QtWidgets.QWidget):
         buttons_hlayout.addWidget(self.add_player_button)
 
         # Clear out player entries
-        self.clear_game_button = QtWidgets.QPushButton("Clear Game")
-        # self.clear_game_button.clicked.connect(self.clear_game)
-        buttons_hlayout.addWidget(self.clear_game_button)
+        self.clear_players_button = QtWidgets.QPushButton("Clear Game")
+        self.clear_players_button.clicked.connect(self.clear_players_signal.emit) # for PhotonClient to clear data
+        self.clear_players_button.clicked.connect(self.clear_players) # clears players on the UI
+
+        buttons_hlayout.addWidget(self.clear_players_button)
 
         # Change client address
-        self.change_udp_network_button = QtWidgets.QPushButton("Change UDP Network")
-        # self.change_udp_network_button.clicked.connect(self.change_udp_network)
-        buttons_hlayout.addWidget(self.change_udp_network_button)
+        self.change_net_addr_button = QtWidgets.QPushButton("Change UDP Network")
+        self.change_net_addr_button.clicked.connect(self.change_net_addr_signal)
+        buttons_hlayout.addWidget(self.change_net_addr_button)
 
         # Start game button
         self.button = QtWidgets.QPushButton("START GAME")
@@ -101,6 +105,11 @@ class EntryWindow(QtWidgets.QWidget):
     def add_player(self, team_name: str, player_id: int, equipment_id: int, codename: str):
         self.team_tables[team_name].add_player(player_id, equipment_id, codename)
 
+    def clear_players(self):
+        # clears players from the table/screen, but not from the database
+        for table in self.team_tables.values(): # for in table
+            table.clear_players() # clears
+
     # Window functionality
     # def newGame(self, checked):
     #     self.game.show()
@@ -136,25 +145,6 @@ class EntryWindow(QtWidgets.QWidget):
     #         self.timer.stop()
     #         # self.start_game()
 
-
-    #     self.teams[team_name][player_id] = (equipment_id, codename)
-    #     self.team_tables[team_name].add_player(player_id, codename, equipment_id)
-    #     self.client.send_equipment_id(equipment_id)
-
-    # def change_udp_network(self):
-    #     dlg = ChangeUDPNetworkDialog(self.client.addr)
-    #     if not dlg.exec():
-    #         return
-
-    #     new_addr = dlg.get_data()
-    #     self.client.set_addr(new_addr)
-
-    # def clear_game(self):
-    #     # clears players from the table/screen, but not from the database
-    #     for table in self.team_tables.values(): # for in table
-    #         table.clear_players() # clears
-    #     self.teams["Red Team"].clear() 
-    #     self.teams["Green Team"].clear() 
 
 class PlayerTable(QtWidgets.QWidget):
     def __init__(self, team_name: str, team_primary_color: QtGui.QColor, team_secondary_color: QtGui.QColor):
