@@ -5,7 +5,7 @@ from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technic
 
 from ui.colors import *
 
-class Game(QtWidgets.QWidget):
+class GameWindow(QtWidgets.QWidget):
     # Initialization and key functions
     def __init__(self):
         super().__init__()

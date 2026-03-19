@@ -5,9 +5,9 @@ from PySide6.QtGui import QKeyEvent
 
 from ui.colors import *
 from ui.dialogs import AddCodenameDialog, AddPlayerDialog, ChangeUDPNetworkDialog
-from ui.game import Game
+from ui.game import GameWindow
 
-class EntryTerminal(QtWidgets.QWidget):
+class EntryWindow(QtWidgets.QWidget):
     # Initialization and key functions
     def __init__(self):
         super().__init__()
@@ -18,7 +18,7 @@ class EntryTerminal(QtWidgets.QWidget):
             "Green Team": {},
         }
 
-        self.game = Game()
+        self.game = GameWindow()
 
         self.setWindowTitle("PHOTON - Start Screen")
         self.resize(720, 643)
