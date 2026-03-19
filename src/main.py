@@ -1,32 +1,15 @@
 # UI/Rendering imports
-from PySide6 import QtWidgets, QtCore, QtGui
-from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
-from PySide6.QtGui import QKeyEvent
+from PySide6.QtWidgets import QApplication
 
-# Custom class imports
-from ui import EntryTerminal, Game
 from network import NetSend, NetRecv
 from database import PlayerDatabase
+from photon import PhotonClient
 
 # Miscellaneous imports
 import sys
 
-class PhotonClient:
-    def __init__(
-        self,
-        database: PlayerDatabase,
-        client: NetSend,
-        server: NetRecv
-    ):
-        self.database = database
-        self.client = client
-        self.server = server
-
-        self.entry_window = EntryTerminal()
-        self.game_window = Game()
-
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     database = PlayerDatabase()
     client = NetSend()
@@ -35,7 +18,8 @@ if __name__ == '__main__':
     photon = PhotonClient(
         database,
         client,
-        server
+        server,
+        ["Red", "Green"]
     )
 
     sys.exit(app.exec())
