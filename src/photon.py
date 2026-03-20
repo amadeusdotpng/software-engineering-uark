@@ -1,3 +1,4 @@
+from PySide6.QtCore import QObject, QTimer
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
 
@@ -5,7 +6,25 @@ from ui import EntryWindow, GameWindow, AddPlayerDialog, AddCodenameDialog, Chan
 from network import NetSend, NetRecv
 from database import PlayerDatabase
 
-class PhotonClient:
+class PhotonPlayer:
+    def __init__(
+        self,
+        player_id: int,
+        equipment_id: int,
+        codename: str
+    ):
+        self.player_id    = player_id
+        self.equipment_id = equipment_id
+        self.codename     = codename
+
+    def data(self) -> tuple[int, int, str]:
+        return (self.player_id, self.equipment_id, self.codename)
+
+    def __hash__(self) -> int:
+        # recommended implementation according to Python docs
+        return hash((self.player_id, self.equipment_id, self.codename))
+
+class PhotonClient(QObject):
     def __init__(
         self,
         database: PlayerDatabase,
@@ -16,7 +35,7 @@ class PhotonClient:
         # non-ui stuff / data
         self.database = database
         self.net_send = net_send
-        self.net_recv = net_recv
+        self.net_recv = net_recv # TODO: PUT THIS IN A QTHREAD
 
         self.player_ids: set[int] = set()
         self.equipment_ids: set[int] = set()
@@ -24,14 +43,20 @@ class PhotonClient:
             name: [] for name, _, _ in teams
         }
 
+        # Timer stuff
+        self.countdown_time = 30
+        self.countdown_timer = QTimer()
+        self.countdown_timer.timeout.connect(self.game_countdown)
+
         # UI stuff
         self.entry_window = EntryWindow(teams)
         self.entry_window.add_player_signal.connect(self.add_player)
         self.entry_window.clear_players_signal.connect(self.clear_players)
+        self.entry_window.change_net_addr_signal.connect(self.change_net_addr)
 
-        self.game_window = GameWindow()
+        self.game_window = GameWindow(teams)
 
-        # Show Entry Window
+        # show EntryWindow on init
         self.entry_window.show()
 
     # TODO: refactor this thing maybe?
@@ -81,7 +106,7 @@ class PhotonClient:
         for team in self.teams.values():
             team.clear()
 
-    def change_udp_network(self):
+    def change_net_addr(self):
         dlg = ChangeUDPNetworkDialog(self.net_send.addr)
         if not dlg.exec():
             return
@@ -91,16 +116,11 @@ class PhotonClient:
         assert new_addr is not None
         self.net_send.set_addr(new_addr)
 
-class PhotonPlayer:
-    def __init__(
-        self,
-        player_id: int,
-        equipment_id: int,
-        codename: str
-    ):
-        self.player_id    = player_id
-        self.equipment_id = equipment_id
-        self.codename     = codename
+    def game_countdown(self):
+        if self.countdown_time <= 0:
+            self.countdown = 30
+            self.countdown_timer.stop()
+            self.start_game()
 
-    def data(self) -> tuple[int, int, str]:
-        return (self.player_id, self.equipment_id, self.codename)
+    def start_game(self):
+        pass

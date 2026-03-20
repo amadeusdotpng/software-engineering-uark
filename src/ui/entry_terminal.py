@@ -82,8 +82,9 @@ class EntryWindow(QtWidgets.QWidget):
         super().showEvent(event)
         self.splash_screen.show()
 
+        self.splash_screen.close()
         # close splash screen after 3 seconds
-        QtCore.QTimer.singleShot(3000, self.splash_screen.close)
+        QtCore.QTimer.singleShot(3000, self.splash_screen.hide)
 
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)

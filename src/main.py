@@ -26,5 +26,5 @@ if __name__ == '__main__':
         server,
         teams
     )
-
+    
     sys.exit(app.exec())

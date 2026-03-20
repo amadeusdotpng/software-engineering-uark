@@ -2,12 +2,16 @@
 
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
+from PySide6.QtGui import QColor
 
 from ui.colors import *
 
 class GameWindow(QtWidgets.QWidget):
     # Initialization and key functions
-    def __init__(self):
+    def __init__(
+        self,
+        teams: list[tuple[str, QColor, QColor]]
+    ):
         super().__init__()
 
         self.setWindowTitle("PHOTON - Game")
@@ -27,17 +31,10 @@ class GameWindow(QtWidgets.QWidget):
         leaderboard_hlayout.setContentsMargins(0, 0, 0, 0)
 
         self.leaderboard_tables = {
-            "Red Team": LeaderboardTable(
-                "RED TEAM",
-                RED_MAIN_COLOR,
-                RED_SECONDARY_COLOR,
-            ),
-            "Green Team": LeaderboardTable(
-                "GREEN TEAM",
-                GREEN_MAIN_COLOR,
-                GREEN_SECONDARY_COLOR,
-            ),
+            name: LeaderboardTable(name, primary_color, secondary_color)
+            for name, primary_color, secondary_color in teams
         }
+
         leaderboard_hlayout.addWidget(self.leaderboard_tables["Red Team"])
         leaderboard_hlayout.addWidget(self.leaderboard_tables["Green Team"])
 
