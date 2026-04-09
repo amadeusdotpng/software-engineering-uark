@@ -2,7 +2,6 @@ from PySide6.QtCore import QObject, QTimer
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
 
-from ui import EntryWindow, GameWindow, AddPlayerDialog, AddCodenameDialog, ChangeUDPNetworkDialog
 from network import NetSend, NetRecv
 from database import PlayerDatabase
 
@@ -35,6 +34,10 @@ class PhotonClient(QObject):
         net_recv: NetRecv,
         teams: list[tuple[str, QColor, QColor]],
     ):
+        # This needs to be here for lazy-loading because otherwise python will
+        # complain about circular import bull____. 
+        from ui import EntryWindow, GameWindow
+
         # non-ui stuff / data
         self.database = database
         self.net_send = net_send
@@ -65,6 +68,9 @@ class PhotonClient(QObject):
         self.entry_window.show()
 
     def add_player(self):
+        # read top comment of __init__
+        from ui import AddPlayerDialog, AddCodenameDialog
+
         dlg = AddPlayerDialog(self.team_names)
         if not dlg.exec():
             return
@@ -109,6 +115,8 @@ class PhotonClient(QObject):
         self.players.clear()
 
     def change_net_addr(self):
+        # read top comment of __init__
+        from ui import ChangeUDPNetworkDialog
         dlg = ChangeUDPNetworkDialog(self.net_send.addr)
         if not dlg.exec():
             return
@@ -143,6 +151,8 @@ class PhotonClient(QObject):
 
     def start_game(self):
         self.net_send.send_game_start()
+
+        self.game_window.update_leaderboards(self.players.values())
 
         self.entry_window.hide()
         self.game_window.show()

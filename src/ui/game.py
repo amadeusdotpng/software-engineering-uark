@@ -5,6 +5,11 @@ from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technic
 from PySide6.QtGui import QColor
 
 from ui.colors import *
+from photon import PhotonPlayer
+
+import itertools
+
+from typing import Iterable
 
 class GameWindow(QtWidgets.QWidget):
     # Initialization and key functions
@@ -48,8 +53,13 @@ class GameWindow(QtWidgets.QWidget):
 
         self.setLayout(vlayout)
 
-    def set_team(self, team_name: str, team_data: dict[int, tuple[int, str]]):
-        self.leaderboard_tables[team_name].set_team(team_data)
+    def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
+        # passes in all players that belong to a team to their respective
+        # leaderboard.
+        for team, players in itertools.groupby(all_players, lambda p: p.team):
+            self.leaderboard_tables[team].update_leaderboard(
+                [(p.codename, p.score) for p in players]
+            )
 
 class LeaderboardTable(QtWidgets.QWidget):
     def __init__(
@@ -104,26 +114,18 @@ class LeaderboardTable(QtWidgets.QWidget):
 
         layout.addWidget(self.leaderboard_table)
 
-        # TODO: implement this!
-        # this does nothing yet because we haven't implemented being able to
-        # receive game actions!
-        total_score_label = QtWidgets.QLabel("Total Score: 0")
-        total_score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(total_score_label)
+        self.total_score_label = QtWidgets.QLabel("Total Score: 0")
+        self.total_score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(self.total_score_label)
 
         self.setLayout(layout)
 
-    def set_team(self, team: dict[int, tuple[int, str]]):
-        # TODO: map player_id to row in leaderboard
-        # fill in team data
-        for row, (_, codename) in enumerate(team.values()):
-            player_col = self.leaderboard_table.item(2+row, 0)
-            score_col  = self.leaderboard_table.item(2+row, 1)
-
-            assert player_col is not None and score_col is not None
-            player_col.setText(codename)
-            score_col.setText("0")
-
+    # This method assumes that all of the players in player_scores belong in
+    # this team's leaderboard.
+    def update_leaderboard(self, player_scores: Iterable[tuple[str, int]]):
+        # TODO: display player name and score in highest to lowest
+        # TODO: update total score
+        pass
 
 
 # TODO: implement this!
