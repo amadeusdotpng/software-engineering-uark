@@ -10,19 +10,19 @@ class PhotonPlayer:
     def __init__(
         self,
         player_id: int,
-        equipment_id: int,
-        codename: str
+        codename: str,
+        team: str
     ):
-        self.player_id    = player_id
-        self.equipment_id = equipment_id
-        self.codename     = codename
+        self.player_id = player_id
+        self.codename  = codename
+        self.team      = team
 
-    def data(self) -> tuple[int, int, str]:
-        return (self.player_id, self.equipment_id, self.codename)
+    def data(self) -> tuple[int, str, str]:
+        return (self.player_id, self.codename, self.team)
 
     def __hash__(self) -> int:
         # recommended implementation according to Python docs
-        return hash((self.player_id, self.equipment_id, self.codename))
+        return hash((self.player_id, self.codename, self.team))
 
 class PhotonClient(QObject):
     def __init__(
@@ -37,11 +37,10 @@ class PhotonClient(QObject):
         self.net_send = net_send
         self.net_recv = net_recv # TODO: PUT THIS IN A QTHREAD
 
+        self.team_names = [name for name, _, _ in teams]
+
         self.player_ids: set[int] = set()
-        self.equipment_ids: set[int] = set()
-        self.teams: dict[str, list[PhotonPlayer]] = {
-            name: [] for name, _, _ in teams
-        }
+        self.equipment_id_map: dict[int, PhotonPlayer] = dict()
 
         # Timer stuff
         self.countdown_time = 30
@@ -58,10 +57,11 @@ class PhotonClient(QObject):
 
         # show EntryWindow on init
         self.entry_window.show()
+        # self.game_window.show()
 
     # TODO: refactor this thing maybe?
     def add_player(self):
-        dlg = AddPlayerDialog(list(self.teams.keys()))
+        dlg = AddPlayerDialog(self.team_names)
         if not dlg.exec():
             return
 
@@ -78,7 +78,7 @@ class PhotonClient(QObject):
             dlg.exec()
             return
 
-        if equipment_id in self.equipment_ids:
+        if equipment_id in self.equipment_id_map:
             dlg = QMessageBox()
             dlg.setText(f"Equipment ID '{equipment_id}' has already been added!")
             dlg.exec()
@@ -94,17 +94,15 @@ class PhotonClient(QObject):
 
         assert isinstance(codename, str)
 
-        self.teams[team_name].append(PhotonPlayer(player_id, equipment_id, codename))
+        self.equipment_id_map[equipment_id] = PhotonPlayer(player_id, codename, team_name)
         self.player_ids.add(player_id)
-        self.equipment_ids.add(equipment_id)
 
         self.net_send.send_equipment_id(equipment_id)
 
         self.entry_window.add_player(team_name, player_id, equipment_id, codename)
 
     def clear_players(self):
-        for team in self.teams.values():
-            team.clear()
+        self.equipment_id_map.clear()
 
     def change_net_addr(self):
         dlg = ChangeUDPNetworkDialog(self.net_send.addr)

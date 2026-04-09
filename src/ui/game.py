@@ -23,20 +23,20 @@ class GameWindow(QtWidgets.QWidget):
         title.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(title)
 
-        curr_scores_label = QtWidgets.QLabel("Current Scores")
-        vlayout.addWidget(curr_scores_label)
+        scores_label = QtWidgets.QLabel("Current Scores")
+        vlayout.addWidget(scores_label)
 
         leaderboard_hlayout = QHBoxLayout()
         leaderboard_hlayout.setSpacing(0)
         leaderboard_hlayout.setContentsMargins(0, 0, 0, 0)
 
         self.leaderboard_tables = {
-            name: LeaderboardTable(name, primary_color, secondary_color)
+            name: LeaderboardTable(name.upper(), primary_color, secondary_color)
             for name, primary_color, secondary_color in teams
         }
 
-        leaderboard_hlayout.addWidget(self.leaderboard_tables["Red Team"])
-        leaderboard_hlayout.addWidget(self.leaderboard_tables["Green Team"])
+        for table in self.leaderboard_tables.values():
+            leaderboard_hlayout.addWidget(table)
 
         vlayout.addLayout(leaderboard_hlayout)
 
