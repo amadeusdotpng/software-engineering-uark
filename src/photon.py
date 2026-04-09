@@ -5,6 +5,8 @@ from PySide6.QtWidgets import QMessageBox
 from network import NetSend, NetRecv
 from database import PlayerDatabase
 
+from typing import Iterable
+
 class PhotonPlayer:
     def __init__(
         self,
@@ -32,7 +34,7 @@ class PhotonClient(QObject):
         database: PlayerDatabase,
         net_send: NetSend,
         net_recv: NetRecv,
-        teams: list[tuple[str, QColor, QColor]],
+        team_colors: Iterable[tuple[str, QColor, QColor]],
     ):
         # This needs to be here for lazy-loading because otherwise python will
         # complain about circular import bull____. 
@@ -43,11 +45,10 @@ class PhotonClient(QObject):
         self.net_send = net_send
         self.net_recv = net_recv # TODO: PUT THIS IN A QTHREAD
 
-        self.team_names = [name for name, _, _ in teams]
+        self.team_names = [name for name, _, _ in team_colors]
 
         self.player_ids: set[int] = set()
         self.players: dict[int, PhotonPlayer] = dict()
-
 
         # Timer stuff
         self.countdown_time = PhotonClient.START_GAME_DELAY
@@ -56,13 +57,13 @@ class PhotonClient(QObject):
         # TODO: ADD TIMER FOR GAME
 
         # UI stuff
-        self.entry_window = EntryWindow(teams)
+        self.entry_window = EntryWindow(team_colors)
         self.entry_window.add_player_signal.connect(self.add_player)
         self.entry_window.clear_players_signal.connect(self.clear_players)
         self.entry_window.change_net_addr_signal.connect(self.change_net_addr)
         self.entry_window.start_game_signal.connect(self.toggle_countdown)
 
-        self.game_window = GameWindow(teams)
+        self.game_window = GameWindow(team_colors)
 
         # show EntryWindow on init
         self.entry_window.show()

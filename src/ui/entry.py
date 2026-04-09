@@ -4,8 +4,8 @@ from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technic
 from PySide6.QtGui import QKeyEvent, QColor
 
 from ui.colors import *
-# from ui.dialogs import AddCodenameDialog, AddPlayerDialog, ChangeUDPNetworkDialog
-# from ui.game import GameWindow
+
+from typing import Iterable
 
 class EntryWindow(QtWidgets.QWidget):
     add_player_signal = QtCore.Signal()
@@ -15,7 +15,7 @@ class EntryWindow(QtWidgets.QWidget):
 
     def __init__(
         self,
-        teams: list[tuple[str, QColor, QColor]]
+        teams: Iterable[tuple[str, QColor, QColor]]
     ):
         super().__init__()
 
@@ -116,37 +116,6 @@ class EntryWindow(QtWidgets.QWidget):
 
     def reset_countdown_text(self):
         self.button.setText('Start Game')
-
-    # Game management
-    # def start_game(self):
-    #     if self.game.isVisible():
-    #         print("Im doing nothing")
-    #     else:
-    #         for team_name, team_data in self.teams.items():
-    #             self.game.set_team(team_name, team_data)
-    #         self.game.show()
-    #         self.hide()
-    #         self.client.send_game_start()
-
-    # def countdown(self):
-    #     # Initialize starting time and timer
-    #     self.countdown_time = 30
-    #     self.timer = QtCore.QTimer(self)
-
-    #     # Reduce countdown variable by one every 1000 ms
-    #     self.button.setText(str(self.countdown_time)+ " seconds until game start...")
-    #     self.timer.start(1000)
-    #     self.timer.timeout.connect(self.update_time)
-
-    # def update_time(self):
-    #     # Update button text and decrement countdown
-    #     self.countdown_time = self.countdown_time - 1
-    #     self.button.setText(str(self.countdown_time) + " seconds until game start...")
-
-    #     # Stop timer and start game once 30 seconds have passed
-    #     if self.countdown_time <= 0:
-    #         self.timer.stop()
-    #         # self.start_game()
 
 
 class PlayerTable(QtWidgets.QWidget):

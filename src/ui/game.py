@@ -7,15 +7,14 @@ from PySide6.QtGui import QColor
 from ui.colors import *
 from photon import PhotonPlayer
 
-import itertools
-
 from typing import Iterable
+import itertools
 
 class GameWindow(QtWidgets.QWidget):
     # Initialization and key functions
     def __init__(
         self,
-        teams: list[tuple[str, QColor, QColor]]
+        team_colors: Iterable[tuple[str, QColor, QColor]]
     ):
         super().__init__()
 
@@ -37,7 +36,7 @@ class GameWindow(QtWidgets.QWidget):
 
         self.leaderboard_tables = {
             name: LeaderboardTable(name.upper(), primary_color, secondary_color)
-            for name, primary_color, secondary_color in teams
+            for name, primary_color, secondary_color in team_colors
         }
 
         for table in self.leaderboard_tables.values():
