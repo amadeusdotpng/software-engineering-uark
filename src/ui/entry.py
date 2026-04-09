@@ -11,6 +11,7 @@ class EntryWindow(QtWidgets.QWidget):
     add_player_signal = QtCore.Signal()
     clear_players_signal = QtCore.Signal()
     change_net_addr_signal = QtCore.Signal()
+    start_game_signal = QtCore.Signal()
 
     def __init__(
         self,
@@ -52,8 +53,10 @@ class EntryWindow(QtWidgets.QWidget):
 
         # Clear out player entries
         self.clear_players_button = QtWidgets.QPushButton("Clear Game")
-        self.clear_players_button.clicked.connect(self.clear_players_signal.emit) # for PhotonClient to clear data
-        self.clear_players_button.clicked.connect(self.clear_players) # clears players on the UI
+        # For `PhotonClient` to clear data
+        self.clear_players_button.clicked.connect(self.clear_players_signal.emit)
+        # Clear players on the UI
+        self.clear_players_button.clicked.connect(self.clear_players) 
 
         buttons_hlayout.addWidget(self.clear_players_button)
 
@@ -63,8 +66,8 @@ class EntryWindow(QtWidgets.QWidget):
         buttons_hlayout.addWidget(self.change_net_addr_button)
 
         # Start game button
-        self.button = QtWidgets.QPushButton("START GAME")
-        # self.button.clicked.connect(self.countdown)
+        self.button = QtWidgets.QPushButton("Start Game")
+        self.button.clicked.connect(self.start_game_signal.emit)
         buttons_hlayout.addWidget(self.button)
 
         vlayout.addLayout(buttons_hlayout)
@@ -98,9 +101,6 @@ class EntryWindow(QtWidgets.QWidget):
     #         self.start_game()
     #     super().keyPressEvent(event)
 
-    def keyReleaseEvent(self, event):
-        super().keyPressEvent(event)
-
     # This assumes that the player has been validated, i.e. the player has a valid player id, a
     # valid equipment id, a valid codename, and is a not a duplicate.
     def add_player(self, team_name: str, player_id: int, equipment_id: int, codename: str):
@@ -111,9 +111,11 @@ class EntryWindow(QtWidgets.QWidget):
         for table in self.team_tables.values(): # for in table
             table.clear_players() # clears
 
-    # Window functionality
-    # def newGame(self, checked):
-    #     self.game.show()
+    def change_countdown_text(self, n: int):
+        self.button.setText(f'{n} seconds until game start...')
+
+    def reset_countdown_text(self):
+        self.button.setText('Start Game')
 
     # Game management
     # def start_game(self):
@@ -227,4 +229,5 @@ class PlayerTable(QtWidgets.QWidget):
                     item.setText("")
         # resets player count technically
         self.players_num = 0
+
 

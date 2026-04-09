@@ -21,6 +21,12 @@ class NetSend:
         print("Game has started, broadcasting code 202")
         self.sock.sendto(str(202).encode(), (self.addr, self.SEND_PORT))
 
+    def send_game_end(self):
+        print("Game has started, broadcasting code 221")
+        self.sock.sendto(str(221).encode(), (self.addr, self.SEND_PORT))
+        self.sock.sendto(str(221).encode(), (self.addr, self.SEND_PORT))
+        self.sock.sendto(str(221).encode(), (self.addr, self.SEND_PORT))
+
 # receives stuff
 class NetRecv:
     RECV_PORT   = 7501
