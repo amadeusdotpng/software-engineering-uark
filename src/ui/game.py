@@ -10,7 +10,11 @@ from photon import PhotonPlayer
 from typing import Iterable
 import itertools
 
+# TODO: a way to end game early?
+# TODO: add base icon to player who hit a base
 class GameWindow(QtWidgets.QWidget):
+    close_photon_signal = QtCore.Signal()
+
     # Initialization and key functions
     def __init__(
         self,
@@ -59,6 +63,12 @@ class GameWindow(QtWidgets.QWidget):
             self.leaderboard_tables[team].update_leaderboard(
                 [(p.codename, p.score) for p in players]
             )
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        super().closeEvent(event)
+        self.close_photon_signal.emit()
+
+
 
 class LeaderboardTable(QtWidgets.QWidget):
     def __init__(

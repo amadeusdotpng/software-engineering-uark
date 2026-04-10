@@ -1,4 +1,5 @@
-from PySide6.QtCore import QObject, QTimer
+from PySide6 import QtGui
+from PySide6.QtCore import QObject, QTimer, QThread
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
 
@@ -27,7 +28,7 @@ class PhotonPlayer:
         return hash((self.player_id, self.codename, self.team))
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 5 # 30 seconds
+    START_GAME_DELAY = 30 # 30 seconds
 
     def __init__(
         self,
@@ -36,6 +37,7 @@ class PhotonClient(QObject):
         net_recv: NetRecv,
         team_colors: Iterable[tuple[str, QColor, QColor]],
     ):
+        super().__init__()
         # This needs to be here for lazy-loading because otherwise python will
         # complain about circular import bull____. 
         from ui import EntryWindow, GameWindow
@@ -43,12 +45,25 @@ class PhotonClient(QObject):
         # non-ui stuff / data
         self.database = database
         self.net_send = net_send
-        self.net_recv = net_recv # TODO: PUT THIS IN A QTHREAD
+        self.net_recv = net_recv
+        self.net_recv.recv_data_signal.connect(self.process_recv_data)
+
+        self.net_recv_thread = QThread(parent=self)
+        self.net_recv.moveToThread(self.net_recv_thread)
+        self.net_recv_thread.started.connect(self.net_recv.recv_data)
+
+        # NOTE: NetRecv thread will be active the entire program's lifetime!!!
+        # This means that we could potentially receive data even if a game
+        # isn't active.
+        # ...i think this is the move but i'm not sure.
+        self.net_recv_thread.start() 
 
         self.team_names = [name for name, _, _ in team_colors]
 
         self.player_ids: set[int] = set()
         self.players: dict[int, PhotonPlayer] = dict()
+
+        self.game_active = False
 
         # Timer stuff
         self.countdown_time = PhotonClient.START_GAME_DELAY
@@ -62,8 +77,10 @@ class PhotonClient(QObject):
         self.entry_window.clear_players_signal.connect(self.clear_players)
         self.entry_window.change_net_addr_signal.connect(self.change_net_addr)
         self.entry_window.start_game_signal.connect(self.toggle_countdown)
+        self.entry_window.close_photon_signal.connect(self.close)
 
         self.game_window = GameWindow(team_colors)
+        self.game_window.close_photon_signal.connect(self.close)
 
         # show EntryWindow on init
         self.entry_window.show()
@@ -151,16 +168,44 @@ class PhotonClient(QObject):
         self.entry_window.change_countdown_text(self.countdown_time)
 
     def start_game(self):
+        if self.game_active:
+            return
+        self.game_active = True
+
         self.net_send.send_game_start()
 
         self.game_window.update_leaderboards(self.players.values())
-
         self.entry_window.hide()
         self.game_window.show()
 
+
     # TODO: call / connect this to when game ends
     def end_game(self):
+        if not self.game_active:
+            return
+        self.game_active = False
+
+        # TODO: reset all player scores
+
         self.net_send.send_game_end()
 
         self.game_window.hide()
         self.entry_window.show()
+
+    # TODO: process data that's received... format is `int:int` where
+    # - the first  `int` is the Equipment ID of the person sending the data
+    # - the second `int` is the Equipment ID of the person who got shot
+    def process_recv_data(self, data: bytes):
+        # don't care about received data if game hasn't even started
+        if not self.game_active:
+            return
+
+        # do stuff... update scores, send equipment id of person who got hit,
+        # make sure to check if the person hit a base
+
+    def close(self):
+        if self.net_recv_thread.isRunning():
+            self.net_recv_thread.requestInterruption()
+            self.net_recv_thread.quit()
+            self.net_recv_thread.wait()
+            print("Shutting down threads...")

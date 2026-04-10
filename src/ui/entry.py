@@ -12,6 +12,7 @@ class EntryWindow(QtWidgets.QWidget):
     clear_players_signal = QtCore.Signal()
     change_net_addr_signal = QtCore.Signal()
     start_game_signal = QtCore.Signal()
+    close_photon_signal = QtCore.Signal()
 
     def __init__(
         self,
@@ -88,6 +89,10 @@ class EntryWindow(QtWidgets.QWidget):
         self.splash_screen.close()
         # close splash screen after 3 seconds
         QtCore.QTimer.singleShot(3000, self.splash_screen.hide)
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        super().closeEvent(event)
+        self.close_photon_signal.emit()
 
     def resizeEvent(self, event:QtGui.QResizeEvent):
         super().resizeEvent(event)
