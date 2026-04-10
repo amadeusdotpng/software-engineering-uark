@@ -2,12 +2,24 @@
 
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
+from PySide6.QtGui import QColor
 
 from ui.colors import *
+from photon import PhotonPlayer
 
-class Game(QtWidgets.QWidget):
+from typing import Iterable
+import itertools
+
+# TODO: a way to end game early?
+# TODO: add base icon to player who hit a base
+class GameWindow(QtWidgets.QWidget):
+    close_photon_signal = QtCore.Signal()
+
     # Initialization and key functions
-    def __init__(self):
+    def __init__(
+        self,
+        team_colors: Iterable[tuple[str, QColor, QColor]]
+    ):
         super().__init__()
 
         self.setWindowTitle("PHOTON - Game")
@@ -19,27 +31,20 @@ class Game(QtWidgets.QWidget):
         title.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(title)
 
-        curr_scores_label = QtWidgets.QLabel("Current Scores")
-        vlayout.addWidget(curr_scores_label)
+        scores_label = QtWidgets.QLabel("Current Scores")
+        vlayout.addWidget(scores_label)
 
         leaderboard_hlayout = QHBoxLayout()
         leaderboard_hlayout.setSpacing(0)
         leaderboard_hlayout.setContentsMargins(0, 0, 0, 0)
 
         self.leaderboard_tables = {
-            "Red Team": LeaderboardTable(
-                "RED TEAM",
-                RED_MAIN_COLOR,
-                RED_SECONDARY_COLOR,
-            ),
-            "Green Team": LeaderboardTable(
-                "GREEN TEAM",
-                GREEN_MAIN_COLOR,
-                GREEN_SECONDARY_COLOR,
-            ),
+            name: LeaderboardTable(name.upper(), primary_color, secondary_color)
+            for name, primary_color, secondary_color in team_colors
         }
-        leaderboard_hlayout.addWidget(self.leaderboard_tables["Red Team"])
-        leaderboard_hlayout.addWidget(self.leaderboard_tables["Green Team"])
+
+        for table in self.leaderboard_tables.values():
+            leaderboard_hlayout.addWidget(table)
 
         vlayout.addLayout(leaderboard_hlayout)
 
@@ -51,8 +56,19 @@ class Game(QtWidgets.QWidget):
 
         self.setLayout(vlayout)
 
-    def set_team(self, team_name: str, team_data: dict[int, tuple[int, str]]):
-        self.leaderboard_tables[team_name].set_team(team_data)
+    def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
+        # passes in all players that belong to a team to their respective
+        # leaderboard.
+        for team, players in itertools.groupby(all_players, lambda p: p.team):
+            self.leaderboard_tables[team].update_leaderboard(
+                [(p.codename, p.score) for p in players]
+            )
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        super().closeEvent(event)
+        self.close_photon_signal.emit()
+
+
 
 class LeaderboardTable(QtWidgets.QWidget):
     def __init__(
@@ -107,26 +123,18 @@ class LeaderboardTable(QtWidgets.QWidget):
 
         layout.addWidget(self.leaderboard_table)
 
-        # TODO: implement this!
-        # this does nothing yet because we haven't implemented being able to
-        # receive game actions!
-        total_score_label = QtWidgets.QLabel("Total Score: 0")
-        total_score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(total_score_label)
+        self.total_score_label = QtWidgets.QLabel("Total Score: 0")
+        self.total_score_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(self.total_score_label)
 
         self.setLayout(layout)
 
-    def set_team(self, team: dict[int, tuple[int, str]]):
-        # TODO: map player_id to row in leaderboard
-        # fill in team data
-        for row, (_, codename) in enumerate(team.values()):
-            player_col = self.leaderboard_table.item(2+row, 0)
-            score_col  = self.leaderboard_table.item(2+row, 1)
-
-            assert player_col is not None and score_col is not None
-            player_col.setText(codename)
-            score_col.setText("0")
-
+    # This method assumes that all of the players in player_scores belong in
+    # this team's leaderboard.
+    def update_leaderboard(self, player_scores: Iterable[tuple[str, int]]):
+        # TODO: display player name and score in highest to lowest
+        # TODO: update total score
+        pass
 
 
 # TODO: implement this!
