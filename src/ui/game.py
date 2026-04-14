@@ -54,6 +54,11 @@ class GameWindow(QtWidgets.QWidget):
         self.game_action_table = GameActionTable()
         vlayout.addWidget(self.game_action_table)
 
+        game_timer = QtWidgets.QLabel("Time Remaining: 6:00")
+        game_timer.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        game_timer.setStyleSheet("font-size: 14pt;")
+        vlayout.addWidget(game_timer)
+
         self.setLayout(vlayout)
 
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):

@@ -28,7 +28,9 @@ class PhotonPlayer:
         return hash((self.player_id, self.codename, self.team))
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 30 # 30 seconds
+    # Change timers to 1 second for testing purposes
+    START_GAME_DELAY = 1 # 30 seconds
+    GAME_TIMER = 5 # 6 minutes
 
     def __init__(
         self,
@@ -65,11 +67,15 @@ class PhotonClient(QObject):
 
         self.game_active = False
 
-        # Timer stuff
+        # Countdown timer
         self.countdown_time = PhotonClient.START_GAME_DELAY
         self.countdown_timer = QTimer(interval=1000)
         self.countdown_timer.timeout.connect(self.update_countdown)
-        # TODO: ADD TIMER FOR GAME
+        
+        # Game timer
+        self.game_timer = PhotonClient.GAME_TIMER
+        self.game_timer = QTimer(interval=1000)
+        self.game_timer.timeout.connect(self.update_game_timer)
 
         # UI stuff
         self.entry_window = EntryWindow(team_colors)
@@ -166,6 +172,10 @@ class PhotonClient(QObject):
 
         self.countdown_time -= 1
         self.entry_window.change_countdown_text(self.countdown_time)
+
+    def update_game_timer(self):
+        if self.countdown_time <= 0:
+            return
 
     def start_game(self):
         if self.game_active:
