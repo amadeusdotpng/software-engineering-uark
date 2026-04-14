@@ -178,6 +178,8 @@ class PhotonClient(QObject):
             self.game_time = PhotonClient.GAME_TIMER
             self.game_timer.stop()
 
+            self.net_send.send_game_end()
+
             # TODO: Add function to replace text with button to return to entry screen
             return
 
@@ -206,8 +208,6 @@ class PhotonClient(QObject):
         self.game_active = False
 
         # TODO: reset all player scores
-
-        self.net_send.send_game_end()
 
         self.game_window.hide()
         self.entry_window.show()
