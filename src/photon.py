@@ -73,7 +73,7 @@ class PhotonClient(QObject):
         self.countdown_timer.timeout.connect(self.update_countdown)
         
         # Game timer
-        self.game_timer = PhotonClient.GAME_TIMER
+        self.game_time = PhotonClient.GAME_TIMER
         self.game_timer = QTimer(interval=1000)
         self.game_timer.timeout.connect(self.update_game_timer)
 
@@ -174,8 +174,15 @@ class PhotonClient(QObject):
         self.entry_window.change_countdown_text(self.countdown_time)
 
     def update_game_timer(self):
-        if self.countdown_time <= 0:
+        if self.game_time <= 0:
+            self.game_time = PhotonClient.GAME_TIMER
+            self.game_timer.stop()
+
+            # TODO: Add function to replace text with button to return to entry screen
             return
+
+        self.game_time -= 1
+        self.game_window.change_game_timer(self.game_time)
 
     def start_game(self):
         if self.game_active:
@@ -183,6 +190,9 @@ class PhotonClient(QObject):
         self.game_active = True
 
         self.net_send.send_game_start()
+
+        self.game_timer.start()
+        self.game_window.change_game_timer(self.game_time)
 
         self.game_window.update_leaderboards(self.players.values())
         self.entry_window.hide()
