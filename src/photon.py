@@ -30,7 +30,7 @@ class PhotonPlayer:
 class PhotonClient(QObject):
     # Change timers to 1 second for testing purposes
     START_GAME_DELAY = 1 # 30 seconds
-    GAME_TIMER = 5 # 6 minutes
+    GAME_TIMER = 60 # 6 minutes
 
     def __init__(
         self,

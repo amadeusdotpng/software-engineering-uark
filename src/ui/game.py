@@ -62,7 +62,13 @@ class GameWindow(QtWidgets.QWidget):
         self.setLayout(vlayout)
 
     def change_game_timer(self, n: int):
-        self.game_timer.setText(f"Time Remaining: {n}")
+        minutes = int(n / 60)
+        seconds = n % 60
+
+        if seconds > 9:
+            self.game_timer.setText(f"Time Remaining: {minutes}:{seconds}")
+        else:
+            self.game_timer.setText(f"Time Remaining: {minutes}:0{seconds}")
 
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
         # passes in all players that belong to a team to their respective
