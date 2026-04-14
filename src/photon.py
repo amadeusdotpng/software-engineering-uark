@@ -231,38 +231,31 @@ class PhotonClient(QObject):
         
         # check to see if player hit base
         if victim_eq_id == "53" and self.red_base_hit == False: # red !!!
-            print("\nRED BASE HIT")
             shooter.score += 100 
             self.red_base_hit = True
     
         elif victim_eq_id == "43" and self.green_base_hit == False: # green !!!!
-            print("\nGREEN BASE HIT")
             shooter.score += 100 
             self.green_base_hit = True
         
+        # if not a base hit
         else:
             # grab photon player object from dict
             victim = self.players.get(int(victim_eq_id))
         
             # friendly fire scenario
             if int(shooter_eq_id) % 2 == 0 and int(victim_eq_id) % 2 == 0: 
-                print("\nFRIENDLY FIRE")
                 victim.score -= 10 
                 shooter.score -= 10 
             # friendly fire scenario #2
             elif int(shooter_eq_id) % 2 == 1 and int(victim_eq_id) % 2 == 1:
-                print("\nFRIENDLY FIRE")
                 victim.score -= 10 
                 shooter.score -= 10 
             # else player just scored
             else:
-                print("\nPLAYER SCORED")
                 shooter.score += 10
-        
-        if self.green_base_hit or self.red_base_hit: 
-            print(shooter.codename + "= " + str(shooter.score))
-        else:
-            print(shooter.codename + "= " + str(shooter.score) + "\n" + victim.codename + "= " + str(victim.score))
+
+        # send back eq id of victim. woah.        
         self.net_send.send_equipment_id(victim_eq_id)
 
     def close(self):
