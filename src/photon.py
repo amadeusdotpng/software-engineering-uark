@@ -27,6 +27,7 @@ class PhotonPlayer:
         # recommended implementation according to Python docs
         return hash((self.player_id, self.codename, self.team))
 
+
 class PhotonClient(QObject):
     START_GAME_DELAY = 30 # 30 seconds
     GAME_TIMER = 360 # 6 minutes
@@ -65,6 +66,8 @@ class PhotonClient(QObject):
         self.players: dict[int, PhotonPlayer] = dict()
 
         self.game_active = False
+        self.green_base_hit = False
+        self.red_base_hit = False
 
         # Countdown timer
         self.countdown_time = PhotonClient.START_GAME_DELAY
@@ -214,12 +217,53 @@ class PhotonClient(QObject):
     # - the first  `int` is the Equipment ID of the person sending the data
     # - the second `int` is the Equipment ID of the person who got shot
     def process_recv_data(self, data: bytes):
+
         # don't care about received data if game hasn't even started
         if not self.game_active:
             return
+        
+        # decode recieved data from bytes
+        data = data.decode(errors='ignore')
+        shooter_eq_id, victim_eq_id = data.split(":") 
 
-        # do stuff... update scores, send equipment id of person who got hit,
-        # make sure to check if the person hit a base
+        # grab photon player object from dict
+        shooter = self.players.get(int(shooter_eq_id))
+        
+        # check to see if player hit base
+        if victim_eq_id == "53" and self.red_base_hit == False: # red !!!
+            print("\nRED BASE HIT")
+            shooter.score += 100 
+            self.red_base_hit = True
+    
+        elif victim_eq_id == "43" and self.green_base_hit == False: # green !!!!
+            print("\nGREEN BASE HIT")
+            shooter.score += 100 
+            self.green_base_hit = True
+        
+        else:
+            # grab photon player object from dict
+            victim = self.players.get(int(victim_eq_id))
+        
+            # friendly fire scenario
+            if int(shooter_eq_id) % 2 == 0 and int(victim_eq_id) % 2 == 0: 
+                print("\nFRIENDLY FIRE")
+                victim.score -= 10 
+                shooter.score -= 10 
+            # friendly fire scenario #2
+            elif int(shooter_eq_id) % 2 == 1 and int(victim_eq_id) % 2 == 1:
+                print("\nFRIENDLY FIRE")
+                victim.score -= 10 
+                shooter.score -= 10 
+            # else player just scored
+            else:
+                print("\nPLAYER SCORED")
+                shooter.score += 10
+        
+        if self.green_base_hit or self.red_base_hit: 
+            print(shooter.codename + "= " + str(shooter.score))
+        else:
+            print(shooter.codename + "= " + str(shooter.score) + "\n" + victim.codename + "= " + str(victim.score))
+        self.net_send.send_equipment_id(victim_eq_id)
 
     def close(self):
         if self.net_recv_thread.isRunning():

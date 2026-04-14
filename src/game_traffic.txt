@@ -1,0 +1,141 @@
+sending Equipment ID '1' to ('127.0.0.1', 7500)
+
+sending Equipment ID '3' to ('127.0.0.1', 7500)
+
+sending Equipment ID '2' to ('127.0.0.1', 7500)
+
+sending Equipment ID '4' to ('127.0.0.1', 7500)
+
+Game has started, broadcasting code 202
+
+emitting bytes: b'3:4'
+
+
+
+PLAYER SCORED
+
+Red Player 2= 10
+
+Green Player 4= 0
+
+sending Equipment ID '4' to ('127.0.0.1', 7500)
+
+emitting bytes: b'1:2'
+
+
+
+PLAYER SCORED
+
+Red Player 1= 10
+
+Green Player 1= 0
+
+sending Equipment ID '2' to ('127.0.0.1', 7500)
+
+emitting bytes: b'3:4'
+
+
+
+PLAYER SCORED
+
+Red Player 2= 20
+
+Green Player 4= 0
+
+sending Equipment ID '4' to ('127.0.0.1', 7500)
+
+emitting bytes: b'3:2'
+
+
+
+PLAYER SCORED
+
+Red Player 2= 30
+
+Green Player 1= 0
+
+sending Equipment ID '2' to ('127.0.0.1', 7500)
+
+emitting bytes: b'3:4'
+
+
+
+PLAYER SCORED
+
+Red Player 2= 40
+
+Green Player 4= 0
+
+sending Equipment ID '4' to ('127.0.0.1', 7500)
+
+emitting bytes: b'1:3'
+
+
+
+FRIENDLY FIRE
+
+Red Player 1= 0
+
+Red Player 2= 30
+
+sending Equipment ID '3' to ('127.0.0.1', 7500)
+
+emitting bytes: b'2:3'
+
+
+
+PLAYER SCORED
+
+Green Player 1= 10
+
+Red Player 2= 30
+
+sending Equipment ID '3' to ('127.0.0.1', 7500)
+
+emitting bytes: b'2:3'
+
+
+
+PLAYER SCORED
+
+Green Player 1= 20
+
+Red Player 2= 30
+
+sending Equipment ID '3' to ('127.0.0.1', 7500)
+
+emitting bytes: b'3:2'
+
+
+
+PLAYER SCORED
+
+Red Player 2= 40
+
+Green Player 1= 20
+
+sending Equipment ID '2' to ('127.0.0.1', 7500)
+
+emitting bytes: b'4:3'
+
+
+
+PLAYER SCORED
+
+Green Player 4= 10
+
+Red Player 2= 40
+
+sending Equipment ID '3' to ('127.0.0.1', 7500)
+
+emitting bytes: b'1:43'
+
+
+
+GREEN BASE HIT
+
+Red Player 1= 100
+
+sending Equipment ID '43' to ('127.0.0.1', 7500)
+
+emitting bytes: b'1:2'
