@@ -30,7 +30,7 @@ class PhotonPlayer:
 class PhotonClient(QObject):
     # Change timers to 1 second for testing purposes
     START_GAME_DELAY = 1 # 30 seconds
-    GAME_TIMER = 60 # 6 minutes
+    GAME_TIMER = 5 # 6 minutes
 
     def __init__(
         self,
@@ -86,6 +86,7 @@ class PhotonClient(QObject):
         self.entry_window.close_photon_signal.connect(self.close)
 
         self.game_window = GameWindow(team_colors)
+        self.game_window.end_game_signal.connect(self.end_game)
         self.game_window.close_photon_signal.connect(self.close)
 
         # show EntryWindow on init
@@ -177,10 +178,9 @@ class PhotonClient(QObject):
         if self.game_time <= 0:
             self.game_time = PhotonClient.GAME_TIMER
             self.game_timer.stop()
+            self.game_window.update_timer_status(False)
 
             self.net_send.send_game_end()
-
-            # TODO: Add function to replace text with button to return to entry screen
             return
 
         self.game_time -= 1
@@ -194,14 +194,13 @@ class PhotonClient(QObject):
         self.net_send.send_game_start()
 
         self.game_timer.start()
+        self.game_window.update_timer_status(True)
         self.game_window.change_game_timer(self.game_time)
 
         self.game_window.update_leaderboards(self.players.values())
         self.entry_window.hide()
         self.game_window.show()
 
-
-    # TODO: call / connect this to when game ends
     def end_game(self):
         if not self.game_active:
             return
