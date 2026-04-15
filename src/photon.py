@@ -28,9 +28,8 @@ class PhotonPlayer:
         return hash((self.player_id, self.codename, self.team))
 
 class PhotonClient(QObject):
-    # Change timers to 1 second for testing purposes
-    START_GAME_DELAY = 1 # 30 seconds
-    GAME_TIMER = 5 # 6 minutes
+    START_GAME_DELAY = 30 # 30 seconds
+    GAME_TIMER = 360 # 6 minutes
 
     def __init__(
         self,
