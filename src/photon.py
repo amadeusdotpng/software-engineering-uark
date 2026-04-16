@@ -29,6 +29,7 @@ class PhotonPlayer:
 
 class PhotonClient(QObject):
     START_GAME_DELAY = 30 # 30 seconds
+    GAME_TIMER = 360 # 6 minutes
 
     def __init__(
         self,
@@ -65,11 +66,15 @@ class PhotonClient(QObject):
 
         self.game_active = False
 
-        # Timer stuff
+        # Countdown timer
         self.countdown_time = PhotonClient.START_GAME_DELAY
         self.countdown_timer = QTimer(interval=1000)
         self.countdown_timer.timeout.connect(self.update_countdown)
-        # TODO: ADD TIMER FOR GAME
+        
+        # Game timer
+        self.game_time = PhotonClient.GAME_TIMER
+        self.game_timer = QTimer(interval=1000)
+        self.game_timer.timeout.connect(self.update_game_timer)
 
         # UI stuff
         self.entry_window = EntryWindow(team_colors)
@@ -80,6 +85,7 @@ class PhotonClient(QObject):
         self.entry_window.close_photon_signal.connect(self.close)
 
         self.game_window = GameWindow(team_colors)
+        self.game_window.end_game_signal.connect(self.end_game)
         self.game_window.close_photon_signal.connect(self.close)
 
         # show EntryWindow on init
@@ -167,6 +173,18 @@ class PhotonClient(QObject):
         self.countdown_time -= 1
         self.entry_window.change_countdown_text(self.countdown_time)
 
+    def update_game_timer(self):
+        if self.game_time <= 0:
+            self.game_time = PhotonClient.GAME_TIMER
+            self.game_timer.stop()
+            self.game_window.update_timer_status(False)
+
+            self.net_send.send_game_end()
+            return
+
+        self.game_time -= 1
+        self.game_window.change_game_timer(self.game_time)
+
     def start_game(self):
         if self.game_active:
             return
@@ -174,20 +192,20 @@ class PhotonClient(QObject):
 
         self.net_send.send_game_start()
 
+        self.game_timer.start()
+        self.game_window.update_timer_status(True)
+        self.game_window.change_game_timer(self.game_time)
+
         self.game_window.update_leaderboards(self.players.values())
         self.entry_window.hide()
         self.game_window.show()
 
-
-    # TODO: call / connect this to when game ends
     def end_game(self):
         if not self.game_active:
             return
         self.game_active = False
 
         # TODO: reset all player scores
-
-        self.net_send.send_game_end()
 
         self.game_window.hide()
         self.entry_window.show()

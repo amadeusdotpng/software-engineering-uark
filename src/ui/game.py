@@ -14,6 +14,7 @@ import itertools
 # TODO: add base icon to player who hit a base
 class GameWindow(QtWidgets.QWidget):
     close_photon_signal = QtCore.Signal()
+    end_game_signal = QtCore.Signal()
 
     # Initialization and key functions
     def __init__(
@@ -54,7 +55,33 @@ class GameWindow(QtWidgets.QWidget):
         self.game_action_table = GameActionTable()
         vlayout.addWidget(self.game_action_table)
 
+        self.game_timer = QtWidgets.QLabel("Time Remaining: 6:00")
+        self.game_timer.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        self.game_timer.setStyleSheet("font-size: 14pt;")
+        vlayout.addWidget(self.game_timer)
+
+        self.return_button = QtWidgets.QPushButton("Return to Player Entry")
+        self.return_button.clicked.connect(self.end_game_signal.emit)
+        vlayout.addWidget(self.return_button)
+
         self.setLayout(vlayout)
+
+    def change_game_timer(self, n: int):
+        minutes = int(n / 60)
+        seconds = n % 60
+
+        if seconds > 9:
+            self.game_timer.setText(f"Time Remaining: {minutes}:{seconds}")
+        else:
+            self.game_timer.setText(f"Time Remaining: {minutes}:0{seconds}")
+
+    def update_timer_status(self, game_active):
+        if game_active:
+            self.game_timer.show()
+            self.return_button.hide()
+        else:
+            self.game_timer.hide()
+            self.return_button.show()
 
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
         # passes in all players that belong to a team to their respective
