@@ -78,10 +78,6 @@ class PlayerDatabase:
         for data in rows:
             print(f"ID: {data[0]}\tCodename: {data[1]}")
 
-    # TODO: document function
-    def get_active_players(self):
-        return []
-
     # Close cursor and connection
     def close(self):
         if self.conn:
