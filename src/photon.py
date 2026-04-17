@@ -1,7 +1,10 @@
 from PySide6 import QtGui
-from PySide6.QtCore import QObject, QTimer, QThread
+from PySide6.QtCore import QObject, QTimer, QThread, QUrl
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput # audio
+import random # to choose random track
+import os
 
 from network import NetSend, NetRecv
 from database import PlayerDatabase
@@ -65,6 +68,12 @@ class PhotonClient(QObject):
         self.players: dict[int, PhotonPlayer] = dict()
 
         self.game_active = False
+
+        # audio
+        self.audio_output = QAudioOutput()
+        self.audio_output.setVolume(0.7)
+        self.media_player = QMediaPlayer()
+        self.media_player.setAudioOutput(self.audio_output)
 
         # Countdown timer
         self.countdown_time = PhotonClient.START_GAME_DELAY
@@ -184,6 +193,17 @@ class PhotonClient(QObject):
 
         self.game_time -= 1
         self.game_window.change_game_timer(self.game_time)
+
+    def play_track(self, folder_path="res/audio"):
+        tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
+        if not tracks:
+            print("No audio tracks found")
+            return
+    
+        chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
+
+        self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(chosen))) # load in track
+        self.media_player.play() #play da track
 
     def start_game(self):
         if self.game_active:
