@@ -210,6 +210,8 @@ class PhotonClient(QObject):
             return
         self.game_active = True
 
+        self.play_track()
+
         self.net_send.send_game_start()
 
         self.game_timer.start()
