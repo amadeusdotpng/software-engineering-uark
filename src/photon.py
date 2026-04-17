@@ -179,7 +179,7 @@ class PhotonClient(QObject):
             self.start_game()
             return
         
-        if self.countdown_time == 16: # syncing with countdown on screen
+        if self.countdown_time == 18: # syncing with countdown on screen
             self.play_track()
 
 
