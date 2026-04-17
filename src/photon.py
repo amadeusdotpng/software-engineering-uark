@@ -194,7 +194,7 @@ class PhotonClient(QObject):
         self.game_time -= 1
         self.game_window.change_game_timer(self.game_time)
 
-    def play_track(self, folder_path="res/audio"):
+    def play_track(self, folder_path="res/tracks"):
         tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
         if not tracks:
             print("No audio tracks found")
