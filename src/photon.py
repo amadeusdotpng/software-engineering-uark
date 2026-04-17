@@ -178,6 +178,10 @@ class PhotonClient(QObject):
             self.entry_window.reset_countdown_text()
             self.start_game()
             return
+        
+        if self.countdown_time == 8: # syncing with countdown on screen
+            self.play_track()
+
 
         self.countdown_time -= 1
         self.entry_window.change_countdown_text(self.countdown_time)
@@ -196,23 +200,16 @@ class PhotonClient(QObject):
 
     def play_track(self, folder_path="res/tracks"):
         tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
-        if not tracks:
-            print("No audio tracks found")
-            return
     
         chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
-        print(f"trying to play {chosen}") # trying to debug
 
         self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(chosen))) # load in track
         self.media_player.play() #play da track
-        print(f"status: {self.media_player.playbackState()}") # trying to debug
 
     def start_game(self):
         if self.game_active:
             return
         self.game_active = True
-
-        self.play_track()
 
         self.net_send.send_game_start()
 
