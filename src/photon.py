@@ -201,9 +201,11 @@ class PhotonClient(QObject):
             return
     
         chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
+        print(f"trying to play {chosen}") # trying to debug
 
         self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(chosen))) # load in track
         self.media_player.play() #play da track
+        print(f"status: {self.media_player.playbackState()}") # trying to debug
 
     def start_game(self):
         if self.game_active:
