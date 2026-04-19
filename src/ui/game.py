@@ -110,14 +110,14 @@ class LeaderboardTable(QtWidgets.QWidget):
         self.team_secondary_color = team_secondary_color
 
         layout = QVBoxLayout()
-        
+
         self.leaderboard_table = QTableWidget()
         self.leaderboard_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers) # Disable editing of table
 
         # set dimensions
         self.leaderboard_table.setRowCount(12)
         self.leaderboard_table.setColumnCount(2)
-        
+
         # table will fit the screen horizontally
         self.leaderboard_table.horizontalHeader().setStretchLastSection(True)
         self.leaderboard_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -159,10 +159,23 @@ class LeaderboardTable(QtWidgets.QWidget):
     # This method assumes that all of the players in player_scores belong in
     # this team's leaderboard.
     def update_leaderboard(self, player_scores: Iterable[tuple[str, int]]):
-        # TODO: display player name and score in highest to lowest
-        # TODO: update total score
-        pass
+        sorted_scores = sorted(player_scores, key=lambda x: x[1], reverse=True)
+        total = 0
 
+        for i, (codename, score) in enumerate(sorted_scores):
+            row = 2 + i
+            for col, text in enumerate([codename, str(score)]):
+                item = self.leaderboard_table.item(row, col)
+                if item:
+                    item.setText(text)
+            total += score
+
+        self.total_score_label.setText(f"Total Score: {total}")
+
+    def flash(self):
+        original = self.leaderboard_table.item(0, 0).background().color()
+        self.leaderboard_table.item(0, 0).setBackground(WHITE)
+        QtCore.QTimer.singleShot(300, lambda: self.leaderboard_table.item(0, 0).setBackground(original))
 
 # TODO: implement this!
 # this does nothing yet because we haven't implemented being able to receive
@@ -174,5 +187,5 @@ class GameActionTable(QtWidgets.QWidget):
         none_label = QtWidgets.QLabel("No Game Actions yet!")
         none_label.setMinimumHeight(200)
         layout.addWidget(none_label)
-        
+
         self.setLayout(layout)
