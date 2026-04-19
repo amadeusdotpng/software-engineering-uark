@@ -90,7 +90,6 @@ class PhotonClient(QObject):
         self.game_window = GameWindow(team_colors)
         self.game_window.end_game_signal.connect(self.end_game)
         self.game_window.close_photon_signal.connect(self.close)
-        self.game_window.debug_key_signal.connect(self.debug_key_handler)  # DEBUG ONLY
 
         # show EntryWindow on init
         self.entry_window.show()

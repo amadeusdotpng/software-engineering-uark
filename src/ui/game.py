@@ -15,8 +15,6 @@ import itertools
 class GameWindow(QtWidgets.QWidget):
     close_photon_signal = QtCore.Signal()
     end_game_signal = QtCore.Signal()
-    # DEBUG ONLY - remove before release
-    debug_key_signal = QtCore.Signal(str)
 
     # Initialization and key functions
     def __init__(
@@ -88,28 +86,14 @@ class GameWindow(QtWidgets.QWidget):
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
         # passes in all players that belong to a team to their respective
         # leaderboard.
-        team_totals: dict[str, int] = {}
         for team, players in itertools.groupby(all_players, lambda p: p.team):
-            player_scores = [(p.codename, p.score) for p in players]
-            self.leaderboard_tables[team].update_leaderboard(player_scores)
-            team_totals[team] = sum(score for _, score in player_scores)
-
-        if team_totals:
-            leading_team = max(team_totals, key=lambda t: team_totals[t])
-            self.leaderboard_tables[leading_team].flash_header()
+            self.leaderboard_tables[team].update_leaderboard(
+                [(p.codename, p.score) for p in players]
+            )
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         super().closeEvent(event)
         self.close_photon_signal.emit()
-
-    # DEBUG ONLY - remove before release
-    def keyPressEvent(self, event: QtGui.QKeyEvent):
-        if event.key() == QtCore.Qt.Key.Key_A:
-            self.debug_key_signal.emit("a")
-        elif event.key() == QtCore.Qt.Key.Key_B:
-            self.debug_key_signal.emit("b")
-        else:
-            super().keyPressEvent(event)
 
 
 
@@ -176,42 +160,22 @@ class LeaderboardTable(QtWidgets.QWidget):
     # this team's leaderboard.
     def update_leaderboard(self, player_scores: Iterable[tuple[str, int]]):
         sorted_scores = sorted(player_scores, key=lambda x: x[1], reverse=True)
+        total = 0
 
-        for i, (name, score) in enumerate(sorted_scores):
-            row = i + 2  # rows 0 and 1 are the header and column labels
-            if row >= self.leaderboard_table.rowCount():
-                break
+        for i, (codename, score) in enumerate(sorted_scores):
+            row = 2 + i
+            for col, text in enumerate([codename, str(score)]):
+                item = self.leaderboard_table.item(row, col)
+                if item:
+                    item.setText(text)
+            total += score
 
-            name_item = self.leaderboard_table.item(row, 0)
-            score_item = self.leaderboard_table.item(row, 1)
-
-            name_item.setText(name)
-            score_item.setText(str(score))
-
-        total = sum(score for _, score in sorted_scores)
         self.total_score_label.setText(f"Total Score: {total}")
 
-    def flash_header(self):
-        """Flash the team header to highlight the leading team."""
-        header_item = self.leaderboard_table.item(0, 0)
-        original_color = self.team_primary_color
-        flash_color = QColor("yellow")
-        flash_count = [0]
-        MAX_FLASHES = 6  # 3 on/off cycles
-
-        def toggle_flash():
-            if flash_count[0] >= MAX_FLASHES:
-                header_item.setBackground(original_color)
-                flash_timer.stop()
-                return
-            header_item.setBackground(flash_color if flash_count[0] % 2 == 0 else original_color)
-            flash_count[0] += 1
-
-        flash_timer = QtCore.QTimer(self)
-        flash_timer.setInterval(300)
-        flash_timer.timeout.connect(toggle_flash)
-        flash_timer.start()
-
+    def flash(self):
+        original = self.leaderboard_table.item(0, 0).background().color()
+        self.leaderboard_table.item(0, 0).setBackground(WHITE)
+        QtCore.QTimer.singleShot(300, lambda: self.leaderboard_table.item(0, 0).setBackground(original))
 
 # TODO: implement this!
 # this does nothing yet because we haven't implemented being able to receive
