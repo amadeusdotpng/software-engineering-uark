@@ -22,9 +22,10 @@ class PhotonPlayer:
         self.codename  = codename
         self.team      = team
         self.score     = 0
+        self.hit_base  = False
 
-    def data(self) -> tuple[int, str, str]:
-        return (self.player_id, self.codename, self.team)
+    def data(self) -> tuple[int, str, str, bool]:
+        return (self.player_id, self.codename, self.team, self.hit_base)
 
     def __hash__(self) -> int:
         # recommended implementation according to Python docs
@@ -32,7 +33,7 @@ class PhotonPlayer:
 
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 30 # 30 seconds
+    START_GAME_DELAY = 1 # 30 seconds
     GAME_TIMER = 360 # 6 minutes
     AUDIO_TRACKS_PATH = "res/tracks"
 
@@ -258,16 +259,22 @@ class PhotonClient(QObject):
         event = None
         
         # player hit base
-        if victim_eq_id == 53 and self.red_base_hit == False: # red !!!
+        if victim_eq_id == 53: # red !!!
+            if self.red_base_hit:
+                return
             shooter.score += 100 
+            shooter.hit_base = True
             self.red_base_hit = True
             event = BaseHitEvent(
                 (shooter.codename, self.team_colors[shooter.team]),
                 RED_SECONDARY_COLOR,
             )
     
-        elif victim_eq_id == 43 and self.green_base_hit == False: # green !!!!
+        elif victim_eq_id == 43: # green !!!!
+            if self.green_base_hit:
+                return
             shooter.score += 100 
+            shooter.hit_base = True
             self.green_base_hit = True
             event = BaseHitEvent(
                 (shooter.codename, self.team_colors[shooter.team]),
