@@ -27,6 +27,8 @@ class GameWindow(QtWidgets.QWidget):
         self.setWindowTitle("PHOTON - Game")
         self.resize(720, 643)
 
+        self.top_team  = None
+        self.top_score = 0
         vlayout = QtWidgets.QVBoxLayout(self)
 
         title = QtWidgets.QLabel("Current Game")
@@ -87,10 +89,21 @@ class GameWindow(QtWidgets.QWidget):
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
         # passes in all players that belong to a team to their respective
         # leaderboard.
+        scores: list[tuple[str, int]] = []
         for team, players in itertools.groupby(all_players, lambda p: p.team):
+            # original iterator gets consumed after iterating through it once :)
+            players = list(players) 
             self.leaderboard_tables[team].update_leaderboard(
                 [(p.codename, p.score) for p in players]
             )
+            scores.append((team, sum(p.score for p in players)))
+
+        # leaderboard header flashes if the leading team changes
+        top_team, top_score = max(scores, key=lambda e: e[1])
+        if self.top_team != top_team and top_score > self.top_score and top_score > 0:
+            self.top_team = top_team
+            self.leaderboard_tables[self.top_team].flash()
+
 
     def push_event(self, event):
         self.events_table.add_event(event)
