@@ -168,7 +168,7 @@ class PlayerTable(QtWidgets.QWidget):
         for row in range(2, self.player_table.rowCount()):
             for col in range(self.player_table.columnCount()):
                 item = QTableWidgetItem()
-                item.setBackground(DAKRGRAY)
+                item.setBackground(DARKGRAY)
                 item.setForeground(WHITE)
                 self.player_table.setItem(row, col, item)
 
@@ -180,7 +180,7 @@ class PlayerTable(QtWidgets.QWidget):
 
             for col in range(self.player_table.columnCount()):
                 item = QTableWidgetItem()
-                item.setBackground(DAKRGRAY)
+                item.setBackground(DARKGRAY)
                 item.setForeground(WHITE)
                 self.player_table.setItem(2 + self.players_num, col, item)
 
