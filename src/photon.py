@@ -22,9 +22,10 @@ class PhotonPlayer:
         self.codename  = codename
         self.team      = team
         self.score     = 0
+        self.hit_base  = False
 
-    def data(self) -> tuple[int, str, str]:
-        return (self.player_id, self.codename, self.team)
+    def data(self) -> tuple[int, str, str, bool]:
+        return (self.player_id, self.codename, self.team, self.hit_base)
 
     def __hash__(self) -> int:
         # recommended implementation according to Python docs
@@ -32,8 +33,9 @@ class PhotonPlayer:
 
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 1 # 30 seconds
+    START_GAME_DELAY = 30 # 30 seconds
     GAME_TIMER = 360 # 6 minutes
+    AUDIO_TRACKS_PATH = "res/tracks"
 
     def __init__(
         self,
@@ -75,6 +77,11 @@ class PhotonClient(QObject):
         self.red_base_hit = False
 
         # audio
+        self.tracks = [
+            QUrl.fromLocalFile(os.path.abspath(os.path.join(PhotonClient.AUDIO_TRACKS_PATH, f)))
+            for f in os.listdir(PhotonClient.AUDIO_TRACKS_PATH)
+            if f.endswith(".mp3") # get all mp3s
+        ]
         self.audio_output = QAudioOutput()
         self.audio_output.setVolume(0.7)
         self.media_player = QMediaPlayer()
@@ -196,20 +203,14 @@ class PhotonClient(QObject):
             self.game_time = PhotonClient.GAME_TIMER
             self.game_timer.stop()
             self.game_window.update_timer_status(False)
-
-            self.net_send.send_game_end()
+            self.end_game()
             return
 
         self.game_time -= 1
         self.game_window.change_game_timer(self.game_time)
 
-    def play_track(self, folder_path="res/tracks"):
-        print('playing tracks?')
-        tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
-    
-        chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
-
-        self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(chosen))) # load in track
+    def play_track(self):
+        self.media_player.setSource(random.choice(self.tracks)) # load in track
         self.media_player.play() #play da track
 
     def start_game(self):
@@ -232,12 +233,14 @@ class PhotonClient(QObject):
             return
         self.game_active = False
 
-        # TODO: reset all player scores
+        self.net_send.send_game_end()
+        for id in self.players:
+            self.players[id].score = 0
+            self.players[id].hit_base = False
 
         self.game_window.hide()
         self.entry_window.show()
 
-    # TODO: process data that's received... format is `int:int` where
     # - the first  `int` is the Equipment ID of the person sending the data
     # - the second `int` is the Equipment ID of the person who got shot
     def process_recv_data(self, data_bytes: bytes):
@@ -255,18 +258,25 @@ class PhotonClient(QObject):
         shooter = self.players[shooter_eq_id]
 
         event = None
+        friendly_fire = False
         
         # player hit base
-        if victim_eq_id == 53 and self.red_base_hit == False: # red !!!
+        if victim_eq_id == 53: # red !!!
+            if self.red_base_hit:
+                return
             shooter.score += 100 
+            shooter.hit_base = True
             self.red_base_hit = True
             event = BaseHitEvent(
                 (shooter.codename, self.team_colors[shooter.team]),
                 RED_SECONDARY_COLOR,
             )
     
-        elif victim_eq_id == 43 and self.green_base_hit == False: # green !!!!
+        elif victim_eq_id == 43: # green !!!!
+            if self.green_base_hit:
+                return
             shooter.score += 100 
+            shooter.hit_base = True
             self.green_base_hit = True
             event = BaseHitEvent(
                 (shooter.codename, self.team_colors[shooter.team]),
@@ -281,6 +291,7 @@ class PhotonClient(QObject):
             if shooter.team == victim.team:
                 victim.score -= 10 
                 shooter.score -= 10 
+                friendly_fire = True
             else:
                 shooter.score += 10
 
@@ -291,6 +302,9 @@ class PhotonClient(QObject):
 
         # send back eq id of victim. woah.        
         self.net_send.send_equipment_id(victim_eq_id)
+        if friendly_fire:
+            self.net_send.send_equipment_id(victim_eq_id)
+
 
         self.game_window.update_leaderboards(self.players.values())
 

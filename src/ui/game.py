@@ -2,7 +2,7 @@
 
 from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technically ;-;
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QIcon
 
 from ui.colors import *
 from ui.events import PlayerHitEvent, BaseHitEvent
@@ -92,9 +92,10 @@ class GameWindow(QtWidgets.QWidget):
         scores: list[tuple[str, int]] = []
         for team, players in itertools.groupby(all_players, lambda p: p.team):
             # original iterator gets consumed after iterating through it once :)
+            # must store in a new list
             players = list(players) 
             self.leaderboard_tables[team].update_leaderboard(
-                [(p.codename, p.score) for p in players]
+                [(p.codename, p.hit_base, p.score) for p in players]
             )
             scores.append((team, sum(p.score for p in players)))
 
@@ -111,7 +112,6 @@ class GameWindow(QtWidgets.QWidget):
     def closeEvent(self, event: QtGui.QCloseEvent):
         super().closeEvent(event)
         self.close_photon_signal.emit()
-
 
 
 class LeaderboardTable(QtWidgets.QWidget):
@@ -161,7 +161,7 @@ class LeaderboardTable(QtWidgets.QWidget):
         for row in range(2, self.leaderboard_table.rowCount()):
             for col in range(self.leaderboard_table.columnCount()):
                 item = QTableWidgetItem()
-                item.setBackground(DAKRGRAY)
+                item.setBackground(DARKGRAY)
                 item.setForeground(WHITE)
                 self.leaderboard_table.setItem(row, col, item)
 
@@ -173,18 +173,24 @@ class LeaderboardTable(QtWidgets.QWidget):
 
         self.setLayout(layout)
 
-    # This method assumes that all of the players in player_scores belong in
-    # this team's leaderboard.
-    def update_leaderboard(self, player_scores: Iterable[tuple[str, int]]):
+    def update_leaderboard(self, player_scores: Iterable[tuple[str, bool, int]]):
         sorted_scores = sorted(player_scores, key=lambda x: x[1], reverse=True)
         total = 0
 
-        for i, (codename, score) in enumerate(sorted_scores):
+        for i, (codename, hit_base, score) in enumerate(sorted_scores):
             row = 2 + i
-            for col, text in enumerate([codename, str(score)]):
-                item = self.leaderboard_table.item(row, col)
-                if item:
-                    item.setText(text)
+            player_item = self.leaderboard_table.item(row, 0)
+            assert player_item is not None
+            player_item.setText(codename)
+            if hit_base:
+                player_item.setIcon(QIcon('res/baseicon.jpg'))
+            else:
+                player_item.setIcon(QIcon())
+
+            item = self.leaderboard_table.item(row, 1)
+            assert item is not None
+            item.setText(str(score))
+
             total += score
 
         self.total_score_label.setText(f"Total Score: {total}")
