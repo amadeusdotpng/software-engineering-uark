@@ -203,8 +203,7 @@ class PhotonClient(QObject):
             self.game_time = PhotonClient.GAME_TIMER
             self.game_timer.stop()
             self.game_window.update_timer_status(False)
-
-            self.net_send.send_game_end()
+            self.end_game()
             return
 
         self.game_time -= 1
@@ -234,12 +233,14 @@ class PhotonClient(QObject):
             return
         self.game_active = False
 
-        # TODO: reset all player scores
+        self.net_send.send_game_end()
+        for id in self.players:
+            self.players[id].score = 0
+            self.players[id].hit_base = False
 
         self.game_window.hide()
         self.entry_window.show()
 
-    # TODO: process data that's received... format is `int:int` where
     # - the first  `int` is the Equipment ID of the person sending the data
     # - the second `int` is the Equipment ID of the person who got shot
     def process_recv_data(self, data_bytes: bytes):
