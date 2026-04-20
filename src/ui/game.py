@@ -5,6 +5,7 @@ from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technic
 from PySide6.QtGui import QColor
 
 from ui.colors import *
+from ui.events import PlayerHitEvent, BaseHitEvent
 from photon import PhotonPlayer
 
 from typing import Iterable
@@ -52,8 +53,8 @@ class GameWindow(QtWidgets.QWidget):
         curr_actions_label = QtWidgets.QLabel("Current Game Actions")
         vlayout.addWidget(curr_actions_label)
 
-        self.game_action_table = GameActionTable()
-        vlayout.addWidget(self.game_action_table)
+        self.events_table = EventsTable()
+        vlayout.addWidget(self.events_table)
 
         self.game_timer = QtWidgets.QLabel("Time Remaining: 6:00")
         self.game_timer.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
@@ -90,6 +91,9 @@ class GameWindow(QtWidgets.QWidget):
             self.leaderboard_tables[team].update_leaderboard(
                 [(p.codename, p.score) for p in players]
             )
+
+    def push_event(self, event: PlayerHitEvent | BaseHitEvent):
+        self.events_table.add_event(event)
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         super().closeEvent(event)
@@ -172,20 +176,44 @@ class LeaderboardTable(QtWidgets.QWidget):
 
         self.total_score_label.setText(f"Total Score: {total}")
 
+
     def flash(self):
         original = self.leaderboard_table.item(0, 0).background().color()
         self.leaderboard_table.item(0, 0).setBackground(WHITE)
         QtCore.QTimer.singleShot(300, lambda: self.leaderboard_table.item(0, 0).setBackground(original))
 
-# TODO: implement this!
-# this does nothing yet because we haven't implemented being able to receive
-# game actions!
-class GameActionTable(QtWidgets.QWidget):
+
+class EventsTable(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
-        none_label = QtWidgets.QLabel("No Game Actions yet!")
-        none_label.setMinimumHeight(200)
-        layout.addWidget(none_label)
+
+        self.events_container_widget = QWidget()
+
+        self.events_container = QVBoxLayout()
+        self.events_container.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.events_container.setSpacing(1)
+        self.events_container.setContentsMargins(0, 0, 0, 0)
+
+
+        self.events_container_widget.setLayout(self.events_container)
+
+        scroll = QScrollArea()
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidgetResizable(True)
+
+        scroll.setWidget(self.events_container_widget)
+
+
+        p = self.events_container_widget.palette()
+        p.setColor(self.events_container_widget.backgroundRole(), LIGHTGRAY)
+        self.events_container_widget.setPalette(p)
+
+        layout.addWidget(scroll)
 
         self.setLayout(layout)
+
+
+    def add_event(self, event: PlayerHitEvent | BaseHitEvent):
+        self.events_container.addWidget(event)
