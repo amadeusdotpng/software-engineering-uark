@@ -257,7 +257,7 @@ class PhotonClient(QObject):
         event = None
         
         # player hit base
-        if victim_eq_id == "53" and self.red_base_hit == False: # red !!!
+        if victim_eq_id == 53 and self.red_base_hit == False: # red !!!
             shooter.score += 100 
             self.red_base_hit = True
             event = BaseHitEvent(
@@ -265,7 +265,7 @@ class PhotonClient(QObject):
                 RED_SECONDARY_COLOR,
             )
     
-        elif victim_eq_id == "43" and self.green_base_hit == False: # green !!!!
+        elif victim_eq_id == 43 and self.green_base_hit == False: # green !!!!
             shooter.score += 100 
             self.green_base_hit = True
             event = BaseHitEvent(
