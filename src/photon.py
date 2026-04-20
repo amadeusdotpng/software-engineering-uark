@@ -32,7 +32,7 @@ class PhotonPlayer:
 
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 30 # 30 seconds
+    START_GAME_DELAY = 1 # 30 seconds
     GAME_TIMER = 360 # 6 minutes
 
     def __init__(
@@ -64,11 +64,13 @@ class PhotonClient(QObject):
         self.net_recv_thread.start() 
 
         self.team_names = [name for name, _, _ in team_colors]
+        self.team_colors = {name: c for name, _, c in team_colors}
 
         self.player_ids: set[int] = set()
         self.players: dict[int, PhotonPlayer] = dict()
 
         self.game_active = False
+        self.num_events = 0
         self.green_base_hit = False
         self.red_base_hit = False
 
@@ -202,6 +204,7 @@ class PhotonClient(QObject):
         self.game_window.change_game_timer(self.game_time)
 
     def play_track(self, folder_path="res/tracks"):
+        print('playing tracks?')
         tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
     
         chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
@@ -237,47 +240,62 @@ class PhotonClient(QObject):
     # TODO: process data that's received... format is `int:int` where
     # - the first  `int` is the Equipment ID of the person sending the data
     # - the second `int` is the Equipment ID of the person who got shot
-    def process_recv_data(self, data: bytes):
-
+    def process_recv_data(self, data_bytes: bytes):
+        from ui import PlayerHitEvent, BaseHitEvent
+        from ui.colors import RED_SECONDARY_COLOR, GREEN_SECONDARY_COLOR
         # don't care about received data if game hasn't even started
         if not self.game_active:
             return
         
         # decode recieved data from bytes
-        data = data.decode(errors='ignore')
-        shooter_eq_id, victim_eq_id = data.split(":") 
+        data = data_bytes.decode(errors='ignore')
+        shooter_eq_id, victim_eq_id = map(int, data.split(':'))
 
         # grab photon player object from dict
-        shooter = self.players.get(int(shooter_eq_id))
+        shooter = self.players[shooter_eq_id]
+
+        event = None
         
-        # check to see if player hit base
-        if victim_eq_id == "53" and self.red_base_hit == False: # red !!!
+        # player hit base
+        if victim_eq_id == 53 and self.red_base_hit == False: # red !!!
             shooter.score += 100 
             self.red_base_hit = True
+            event = BaseHitEvent(
+                (shooter.codename, self.team_colors[shooter.team]),
+                RED_SECONDARY_COLOR,
+            )
     
-        elif victim_eq_id == "43" and self.green_base_hit == False: # green !!!!
+        elif victim_eq_id == 43 and self.green_base_hit == False: # green !!!!
             shooter.score += 100 
             self.green_base_hit = True
+            event = BaseHitEvent(
+                (shooter.codename, self.team_colors[shooter.team]),
+                GREEN_SECONDARY_COLOR,
+            )
         
-        # if not a base hit
+        # player hit another player
         else:
-            # grab photon player object from dict
-            victim = self.players.get(int(victim_eq_id))
+            victim = self.players[victim_eq_id]
         
-            # friendly fire scenario
-            if int(shooter_eq_id) % 2 == 0 and int(victim_eq_id) % 2 == 0: 
+            # friendly fire
+            if shooter.team == victim.team:
                 victim.score -= 10 
                 shooter.score -= 10 
-            # friendly fire scenario #2
-            elif int(shooter_eq_id) % 2 == 1 and int(victim_eq_id) % 2 == 1:
-                victim.score -= 10 
-                shooter.score -= 10 
-            # else player just scored
             else:
                 shooter.score += 10
 
+            event = PlayerHitEvent(
+                (shooter.codename, self.team_colors[shooter.team]),
+                (victim.codename , self.team_colors[victim.team] )
+            )
+
         # send back eq id of victim. woah.        
         self.net_send.send_equipment_id(victim_eq_id)
+
+        self.game_window.update_leaderboards(self.players.values())
+
+        assert event is not None
+        self.game_window.push_event(event)
 
     def close(self):
         if self.net_recv_thread.isRunning():

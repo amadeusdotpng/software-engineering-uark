@@ -5,6 +5,7 @@ from PySide6.QtWidgets import * # TODO: make verbose; this is bad coding technic
 from PySide6.QtGui import QColor
 
 from ui.colors import *
+from ui.events import PlayerHitEvent, BaseHitEvent
 from photon import PhotonPlayer
 
 from typing import Iterable
@@ -26,6 +27,8 @@ class GameWindow(QtWidgets.QWidget):
         self.setWindowTitle("PHOTON - Game")
         self.resize(720, 643)
 
+        self.top_team  = None
+        self.top_score = 0
         vlayout = QtWidgets.QVBoxLayout(self)
 
         title = QtWidgets.QLabel("Current Game")
@@ -52,8 +55,8 @@ class GameWindow(QtWidgets.QWidget):
         curr_actions_label = QtWidgets.QLabel("Current Game Actions")
         vlayout.addWidget(curr_actions_label)
 
-        self.game_action_table = GameActionTable()
-        vlayout.addWidget(self.game_action_table)
+        self.events_table = EventsTable()
+        vlayout.addWidget(self.events_table)
 
         self.game_timer = QtWidgets.QLabel("Time Remaining: 6:00")
         self.game_timer.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
@@ -86,10 +89,24 @@ class GameWindow(QtWidgets.QWidget):
     def update_leaderboards(self, all_players: Iterable[PhotonPlayer]):
         # passes in all players that belong to a team to their respective
         # leaderboard.
+        scores: list[tuple[str, int]] = []
         for team, players in itertools.groupby(all_players, lambda p: p.team):
+            # original iterator gets consumed after iterating through it once :)
+            players = list(players) 
             self.leaderboard_tables[team].update_leaderboard(
                 [(p.codename, p.score) for p in players]
             )
+            scores.append((team, sum(p.score for p in players)))
+
+        # leaderboard header flashes if the leading team changes
+        top_team, top_score = max(scores, key=lambda e: e[1])
+        if self.top_team != top_team and top_score > self.top_score and top_score > 0:
+            self.top_team = top_team
+            self.leaderboard_tables[self.top_team].flash()
+
+
+    def push_event(self, event):
+        self.events_table.add_event(event)
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         super().closeEvent(event)
@@ -172,20 +189,44 @@ class LeaderboardTable(QtWidgets.QWidget):
 
         self.total_score_label.setText(f"Total Score: {total}")
 
+
     def flash(self):
         original = self.leaderboard_table.item(0, 0).background().color()
         self.leaderboard_table.item(0, 0).setBackground(WHITE)
         QtCore.QTimer.singleShot(300, lambda: self.leaderboard_table.item(0, 0).setBackground(original))
 
-# TODO: implement this!
-# this does nothing yet because we haven't implemented being able to receive
-# game actions!
-class GameActionTable(QtWidgets.QWidget):
+
+class EventsTable(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
-        none_label = QtWidgets.QLabel("No Game Actions yet!")
-        none_label.setMinimumHeight(200)
-        layout.addWidget(none_label)
+
+        self.events_container_widget = QWidget()
+
+        self.events_container = QVBoxLayout()
+        self.events_container.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.events_container.setSpacing(1)
+        self.events_container.setContentsMargins(0, 0, 0, 0)
+
+
+        self.events_container_widget.setLayout(self.events_container)
+
+        scroll = QScrollArea()
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidgetResizable(True)
+
+        scroll.setWidget(self.events_container_widget)
+
+
+        p = self.events_container_widget.palette()
+        p.setColor(self.events_container_widget.backgroundRole(), LIGHTGRAY)
+        self.events_container_widget.setPalette(p)
+
+        layout.addWidget(scroll)
 
         self.setLayout(layout)
+
+
+    def add_event(self, event):
+        self.events_container.insertWidget(0, event)

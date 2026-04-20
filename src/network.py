@@ -49,7 +49,10 @@ class NetRecv(QObject):
                 recv_bytes, _ = self.sock.recvfrom(self.BUFFER_SIZE)
                 print(f'emitting bytes: {recv_bytes}')
                 self.recv_data_signal.emit(recv_bytes)
-            except TimeoutError:
-                continue
+            except OSError as e:
+                if e.args[0] == 'timed out':
+                    continue
+                else:
+                    print(f'Error in NetRecv: {e}')
             except Exception as e:
                 print(f'Error in NetRecv: {e}')
