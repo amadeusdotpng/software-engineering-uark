@@ -161,7 +161,7 @@ class LeaderboardTable(QtWidgets.QWidget):
         for row in range(2, self.leaderboard_table.rowCount()):
             for col in range(self.leaderboard_table.columnCount()):
                 item = QTableWidgetItem()
-                item.setBackground(DAKRGRAY)
+                item.setBackground(DARKGRAY)
                 item.setForeground(WHITE)
                 self.leaderboard_table.setItem(row, col, item)
 

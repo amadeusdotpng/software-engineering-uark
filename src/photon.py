@@ -33,8 +33,8 @@ class PhotonPlayer:
 
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 1 # 30 seconds
-    GAME_TIMER = 45 # 6 minutes
+    START_GAME_DELAY = 30 # 30 seconds
+    GAME_TIMER = 360 # 6 minutes
     AUDIO_TRACKS_PATH = "res/tracks"
 
     def __init__(
