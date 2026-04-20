@@ -92,7 +92,7 @@ class GameWindow(QtWidgets.QWidget):
                 [(p.codename, p.score) for p in players]
             )
 
-    def push_event(self, event: PlayerHitEvent | BaseHitEvent):
+    def push_event(self, event):
         self.events_table.add_event(event)
 
     def closeEvent(self, event: QtGui.QCloseEvent):
@@ -215,5 +215,5 @@ class EventsTable(QtWidgets.QWidget):
         self.setLayout(layout)
 
 
-    def add_event(self, event: PlayerHitEvent | BaseHitEvent):
+    def add_event(self, event):
         self.events_container.addWidget(event)
