@@ -34,7 +34,7 @@ class PhotonPlayer:
 
 class PhotonClient(QObject):
     START_GAME_DELAY = 1 # 30 seconds
-    GAME_TIMER = 360 # 6 minutes
+    GAME_TIMER = 45 # 6 minutes
     AUDIO_TRACKS_PATH = "res/tracks"
 
     def __init__(
@@ -257,6 +257,7 @@ class PhotonClient(QObject):
         shooter = self.players[shooter_eq_id]
 
         event = None
+        friendly_fire = False
         
         # player hit base
         if victim_eq_id == 53: # red !!!
@@ -289,6 +290,7 @@ class PhotonClient(QObject):
             if shooter.team == victim.team:
                 victim.score -= 10 
                 shooter.score -= 10 
+                friendly_fire = True
             else:
                 shooter.score += 10
 
@@ -299,6 +301,9 @@ class PhotonClient(QObject):
 
         # send back eq id of victim. woah.        
         self.net_send.send_equipment_id(victim_eq_id)
+        if friendly_fire:
+            self.net_send.send_equipment_id(victim_eq_id)
+
 
         self.game_window.update_leaderboards(self.players.values())
 
