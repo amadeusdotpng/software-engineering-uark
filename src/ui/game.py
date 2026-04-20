@@ -216,4 +216,4 @@ class EventsTable(QtWidgets.QWidget):
 
 
     def add_event(self, event):
-        self.events_container.addWidget(event)
+        self.events_container.insertWidget(0, event)
