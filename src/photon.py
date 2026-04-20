@@ -32,8 +32,9 @@ class PhotonPlayer:
 
 
 class PhotonClient(QObject):
-    START_GAME_DELAY = 1 # 30 seconds
+    START_GAME_DELAY = 30 # 30 seconds
     GAME_TIMER = 360 # 6 minutes
+    AUDIO_TRACKS_PATH = "res/tracks"
 
     def __init__(
         self,
@@ -75,6 +76,11 @@ class PhotonClient(QObject):
         self.red_base_hit = False
 
         # audio
+        self.tracks = [
+            QUrl.fromLocalFile(os.path.abspath(os.path.join(PhotonClient.AUDIO_TRACKS_PATH, f)))
+            for f in os.listdir(PhotonClient.AUDIO_TRACKS_PATH)
+            if f.endswith(".mp3") # get all mp3s
+        ]
         self.audio_output = QAudioOutput()
         self.audio_output.setVolume(0.7)
         self.media_player = QMediaPlayer()
@@ -203,13 +209,8 @@ class PhotonClient(QObject):
         self.game_time -= 1
         self.game_window.change_game_timer(self.game_time)
 
-    def play_track(self, folder_path="res/tracks"):
-        print('playing tracks?')
-        tracks = [f for f in os.listdir(folder_path) if f.endswith(".mp3")] # get all mp3s
-    
-        chosen = os.path.join(folder_path, random.choice(tracks)) # pick a track at random
-
-        self.media_player.setSource(QUrl.fromLocalFile(os.path.abspath(chosen))) # load in track
+    def play_track(self):
+        self.media_player.setSource(random.choice(self.tracks)) # load in track
         self.media_player.play() #play da track
 
     def start_game(self):
