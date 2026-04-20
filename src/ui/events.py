@@ -15,6 +15,11 @@ class PlayerHitEvent(QtWidgets.QWidget):
         layout = QHBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
 
+        self.setAutoFillBackground(True)
+        p = self.palette()
+        p.setColor(self.backgroundRole(), WHITE)
+        self.setPalette(p)
+
         shooter_label = QLabel(f'{shooter[0]}')
 
         shooter_p = shooter_label.palette()
@@ -52,6 +57,11 @@ class BaseHitEvent(QtWidgets.QWidget):
         super().__init__()
         layout = QHBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+
+        self.setAutoFillBackground(True)
+        p = self.palette()
+        p.setColor(self.backgroundRole(), WHITE)
+        self.setPalette(p)
 
         shooter_label = QLabel(f'{shooter[0]}')
 
